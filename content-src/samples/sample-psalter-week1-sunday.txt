@@ -1,0 +1,101 @@
+%% =====================================================================
+%% SAMPLE ENTRY: shows every kind of field for one Hour, so you can see
+%% how a fully loaded office looks in the app. Delete this folder once
+%% real text is imported (or replace the bracketed text with real text).
+%% =====================================================================
+
+=== psalter/w1/sun/inv
+--- invitatory_ant
+[Sample invitatory antiphon for Sunday, Week 1.]
+
+=== psalter/w1/sun/mp
+--- hymn
+[Sample hymn, stanza one, line one,]
+[stanza one, line two,]
+[stanza one, line three,]
+[stanza one, line four.]
+
+[Stanza two, line one,]
+[stanza two, line two.]
+
+--- ant1
+[Sample antiphon 1.]
+
+--- ps1
+psalms/63
+
+--- ant2
+[Sample antiphon 2.]
+
+--- ps2
+canticles/dan3-57-88
+
+--- ant3
+[Sample antiphon 3.]
+
+--- ps3
+psalms/149
+
+--- reading
+@ref Revelation 7:10, 12
+[Sample short reading. The @ref line above becomes the citation.]
+
+--- responsory
+V/ [Sample responsory, first part,] * [second part.]
+R/ [Repeated by all.]
+V/ [Verse.]
+R/ [Second part.]
+V/ Glory to the Father, and to the Son, and to the Holy Spirit.
+R/ [Repeated.]
+
+--- benedictus_ant@A
+[Sample Benedictus antiphon for Year A. Variants like @A, @B, @C, @easter, @lent are chosen automatically.]
+
+--- benedictus_ant
+[Sample Benedictus antiphon used when there is no variant for the current year.]
+
+--- intercessions
+[Sample introduction to the intercessions:]
+R/ [Sample response.]
+
+[First intention,] *
+  — [its second half.]
+
+[Second intention,] *
+  — [its second half.]
+
+--- prayer
+[Sample concluding prayer.] Through our Lord Jesus Christ, your Son, who lives and reigns with you in the unity of the Holy Spirit, God, for ever and ever.
+R/ Amen.
+
+=== psalms/63
+--- title
+Psalm 63:2-9
+--- subtitle
+[Sample psalm title, e.g. a phrase summarizing the psalm]
+--- text
+[Sample psalm verse one, first half] *
+  [verse one, second half].
+[Verse two, first half] †
+  [flex continues] *
+  [verse two, second half].
+
+[A new stanza begins after a blank line] *
+  [and continues here].
+
+=== canticles/dan3-57-88
+--- title
+Canticle — Daniel 3:57-88, 56
+--- no_gloria
+true
+--- text
+! The Glory to the Father is not said after this canticle.
+[Sample canticle verse] *
+  [second half].
+
+=== psalms/149
+--- title
+Psalm 149
+--- text
+[Sample psalm text] *
+  [second half].

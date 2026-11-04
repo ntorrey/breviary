@@ -1,0 +1,103 @@
+# Breviary: Liturgy of the Hours (PWA)
+
+A phone-friendly Liturgy of the Hours app, built as a **progressive web app**: it works in any browser, installs to the home screen like a native app, and works offline. It is built ahead of the new English translation. The calendar and the assembly of each Hour are complete, and the text is loaded separately once it is available and licensed.
+
+## What works now
+
+- **Full liturgical calendar**, computed on the device: seasons, Sundays, weeks, Psalter weeks, Sunday and weekday cycles. It covers the General Roman Calendar plus the **USA proper calendar**, with:
+  - precedence (Table of Liturgical Days)
+  - transfers of solemnities, including the special rules for St. Joseph and the Annunciation
+  - feasts of the Lord replacing Ordinary Time Sundays
+  - memorials becoming commemorations in Lent and late Advent
+  - optional memorials you can choose, and the Saturday memorial of Mary
+  - Evening Prayer I of Sundays and solemnities
+  - Ascension on Thursday or Sunday
+  - **local celebrations** (diocesan patron, church dedication, order saints) added in Settings
+- **All Hours**: Invitatory, Office of Readings, Morning Prayer, Midmorning, Midday, Midafternoon, Evening Prayer (I and II), Night Prayer. Each Hour is assembled from the right sources (proper, common, season, psalter) following the GILH.
+- **Light and dark mode** (follows the phone, or set manually), adjustable text size, and an option to keep the screen on.
+- **Offline**: the service worker caches the app and every text it has loaded. "Download all" in Settings saves everything.
+- **Placeholders that explain themselves.** Where text isn't loaded yet, the app shows exactly which entries it looked in. That doubles as the import to-do list.
+
+## Run it on your computer
+
+Requires [Node.js](https://nodejs.org) 20 or later. There is nothing to install.
+
+```bash
+npm start
+```
+
+Open http://localhost:8080. To see the phone layout, use your browser's device toolbar.
+
+```bash
+npm test
+```
+
+Runs the calendar and office-assembly tests.
+
+## Put it on your phone
+
+A PWA has to be served over **HTTPS**. Free options that serve this folder as-is (no build step):
+
+- **GitHub Pages**: push the folder to a repository, then Settings → Pages → deploy from branch.
+- **Netlify** or **Cloudflare Pages**: drag and drop the folder, or connect the repository.
+
+Then on the phone:
+
+- **iPhone**: open the site in Safari → Share → **Add to Home Screen**.
+- **Android**: open it in Chrome → menu → **Install app**.
+
+> Once real text is loaded, check the license before putting it on a public URL (see [docs/IMPORTING-TEXT.md](docs/IMPORTING-TEXT.md#step-0--permission-comes-first)).
+
+## Adding the text
+
+- [docs/IMPORTING-TEXT.md](docs/IMPORTING-TEXT.md): licensing, and strategies for getting the new translation in, from best (structured file from the publisher) to worst (typing).
+- [docs/CONTENT-FORMAT.md](docs/CONTENT-FORMAT.md): the source format, key scheme, fields, and how each Hour is put together.
+
+```bash
+npm run skeleton
+```
+
+Writes fill-in-the-blank files for every text to `content-src/_skeleton/`.
+
+```bash
+npm run build:content
+```
+
+Compiles `content-src/` into `content/`.
+
+```bash
+npm run coverage -- 2027
+```
+
+Reports what is still missing, ranked by impact.
+
+`content-src/ordinary.txt` currently holds **interim public-domain texts** (traditional prayers, Latin Marian antiphons). `content-src/samples/` shows a fully filled-in Hour with placeholder words. To see it, open Morning Prayer of the First Sunday of Advent 2026. Delete the samples folder when real text arrives.
+
+## Project layout
+
+```
+index.html, manifest.webmanifest, sw.js   PWA shell, install manifest, offline service worker
+css/app.css                               styles; light/dark theme tokens at the top
+js/app.js                                 screens: Today, Hour, Calendar, Settings
+js/settings.js                            user settings (stored on the device)
+js/calendar/                              liturgical calendar engine and saints data
+js/office/assemble.js                     which text goes where in each Hour (GILH rules)
+js/office/render.js                       text markup → HTML
+js/content/store.js                       loads text shards on demand
+content-src/                              editable text sources (what you edit)
+content/                                  compiled JSON (generated; what the app loads)
+tools/                                    dev server, content build, skeleton, coverage, icons
+tests/                                    node --test suites
+```
+
+## Known simplifications and to-dos
+
+These are places where the rules are more detailed than the app currently models. All are noted so they can be refined against the new edition's General Instruction:
+
+- **Triduum specifics.** For example, Evening Prayer on Holy Thursday is only for those not at the evening Mass, and Good Friday and Holy Saturday have their own peculiarities. These are handled by the content, not by special logic.
+- **All Souls** is treated as a solemnity-rank day with its own office. The special rule for when it falls on a Sunday isn't modeled.
+- **Two solemnities on one day** (for example, the Sacred Heart on June 24): the saint's solemnity moves to the next free day. In 2022 the Holy See instead anticipated the Nativity of John the Baptist to June 23. Such years can be handled with a local override.
+- The Invitatory doesn't yet switch away from Psalm 24 when that psalm occurs in the day's psalmody.
+- Office of Readings **vigils**, and combining an Hour with Mass, aren't implemented.
+- **Thanksgiving Day and Independence Day** (U.S. Missal observances) aren't in the calendar.
+- The **day changes at local midnight**. Evening Prayer I shows on the evening before.

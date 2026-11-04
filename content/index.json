@@ -1,0 +1,10 @@
+{
+  "version": "2769b4670cc8",
+  "built": "2026-11-04T03:00:36.108Z",
+  "shards": {
+    "canticles": "canticles.json",
+    "ordinary": "ordinary.json",
+    "psalms": "psalms.json",
+    "psalter/w1": "psalter-w1.json"
+  }
+}

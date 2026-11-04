@@ -1,0 +1,355 @@
+// App shell: routing and views.
+import { getDay, getEvening, getMonth, RANK_LABELS } from './calendar/index.js';
+import { REGIONS } from './calendar/sanctoral-data.js';
+import { todayIso, longDate, fromIso, toIso, addDays, MONTH_NAMES, DOW_NAMES, pad2 } from './calendar/dates.js';
+import { HOURS, HOUR_NAMES, assembleHour } from './office/assemble.js';
+import { blocksToHtml, escapeHtml as esc } from './office/render.js';
+import { ContentStore } from './content/store.js';
+import { getSettings, updateSettings, calendarSettings, applyTheme, onSettingsChange } from './settings.js';
+
+const main = document.getElementById('main');
+const topbar = document.getElementById('topbar');
+const store = new ContentStore(async (p) => {
+  const r = await fetch(`content/${p}`);
+  if (!r.ok) throw new Error(`${r.status} ${p}`);
+  return r.json();
+});
+const storeReady = store.init();
+
+const ICON = {
+  left: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  right: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+  back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  today: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg>',
+};
+
+const SEASON_NAMES = { advent: 'Advent', christmas: 'Christmas Time', ordinary: 'Ordinary Time', lent: 'Lent', triduum: 'Paschal Triduum', easter: 'Easter Time' };
+const ROMAN = ['', 'I', 'II', 'III', 'IV'];
+const shiftIso = (iso, n) => toIso(addDays(fromIso(iso), n));
+
+// ---------------- Router ----------------
+function parseRoute() {
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  const isoOk = (s) => /^\d{4}-\d\d-\d\d$/.test(s || '');
+  switch (parts[0]) {
+    case 'day': return { view: 'day', iso: isoOk(parts[1]) ? parts[1] : todayIso() };
+    case 'hour': return { view: 'hour', iso: isoOk(parts[1]) ? parts[1] : todayIso(), hour: HOUR_NAMES[parts[2]] ? parts[2] : 'mp' };
+    case 'calendar': return { view: 'calendar', ym: /^\d{4}-\d\d$/.test(parts[1] || '') ? parts[1] : todayIso().slice(0, 7) };
+    case 'settings': return { view: 'settings' };
+    default: return { view: 'day', iso: todayIso(), isToday: true };
+  }
+}
+
+let renderToken = 0;
+async function render() {
+  const route = parseRoute();
+  const token = ++renderToken;
+  document.body.classList.toggle('reading', route.view === 'hour');
+  for (const a of document.querySelectorAll('.tabbar a')) {
+    const tab = a.dataset.tab;
+    const on = (tab === 'today' && route.view === 'day') || tab === route.view;
+    if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  }
+  releaseWakeLock();
+  try {
+    if (route.view === 'day') renderDay(route.iso);
+    else if (route.view === 'hour') await renderHour(route.iso, route.hour, token);
+    else if (route.view === 'calendar') renderCalendar(route.ym);
+    else renderSettings();
+  } catch (err) {
+    console.error(err);
+    main.innerHTML = `<p class="loading">Something went wrong: ${esc(err.message)}</p>`;
+  }
+  if (route.view !== 'hour') window.scrollTo(0, 0);
+}
+
+function setTopbar({ left = '', title = '', sub = '', right = '' }) {
+  topbar.innerHTML = `${left || '<span class="icon-btn" hidden></span>'}
+    <div class="title"><strong>${esc(title)}</strong>${sub ? `<small>${esc(sub)}</small>` : ''}</div>
+    ${right || '<span class="icon-btn" hidden></span>'}`;
+}
+
+// ---------------- Day view ----------------
+function renderDay(iso) {
+  const s = getSettings();
+  const cs = calendarSettings(s);
+  const day = getDay(iso, cs);
+  const cel = day.celebration;
+  const t = day.temporal;
+  const isToday = iso === todayIso();
+
+  setTopbar({
+    left: `<a class="icon-btn" href="#/day/${shiftIso(iso, -1)}" aria-label="Previous day">${ICON.left}</a>`,
+    title: isToday ? 'Today' : longDate(iso).replace(/, \d{4}$/, ''),
+    sub: isToday ? longDate(iso) : String(fromIso(iso).getUTCFullYear()),
+    right: `<a class="icon-btn" href="#/day/${shiftIso(iso, 1)}" aria-label="Next day">${ICON.right}</a>`,
+  });
+
+  const rankLabel = RANK_LABELS[cel.rank] || '';
+  const weekLine = cel.source === 'temporal' ? SEASON_NAMES[day.season] : t.title;
+  const notes = [];
+  if (cel.transferredFrom) notes.push(`Ordinarily ${fmtShort(cel.transferredFrom)}; ${cel.transferNote}.`);
+  if (day.suppressed.length) notes.push(`Not celebrated this year: ${day.suppressed.map((x) => x.title).join('; ')}.`);
+  if (day.commemoration) notes.push(`With a commemoration of ${day.commemoration.title}.`);
+
+  const options = day.options.length > 1 ? `
+    <div class="choice">
+      <label for="celebrate">Celebrate</label>
+      <select id="celebrate">
+        ${day.options.map((o) => `<option value="${esc(o.id)}" ${o.id === day.selectedId ? 'selected' : ''}>${esc(o.source === 'temporal' ? `Weekday: ${o.title}` : `${o.title} (${RANK_LABELS[o.rank]})`)}</option>`).join('')}
+      </select>
+    </div>` : '';
+
+  const evening = getEvening(iso, cs);
+  const hourSub = {
+    ep: evening.kind === 'ep1' ? `Evening Prayer I of ${evening.day.celebration.title}` : '',
+    np: evening.kind === 'ep1' ? 'After Evening Prayer I' : '',
+  };
+
+  main.innerHTML = `
+    <section class="day-head lit-${cel.color}">
+      <p class="meta">${esc(weekLine)} · Psalter Week ${ROMAN[day.psalterWeek]}</p>
+      <h1>${esc(cel.title)}</h1>
+      <div class="chips">
+        <span class="chip lit-${cel.color}"><span class="dot"></span>${esc(capital(cel.color))}</span>
+        ${rankLabel ? `<span class="chip">${esc(rankLabel)}</span>` : ''}
+        <span class="chip">Year ${day.sundayCycle} · Weekdays ${day.weekdayCycle}</span>
+      </div>
+      ${notes.map((n) => `<p class="note">${esc(n)}</p>`).join('')}
+      ${options}
+    </section>
+    <h2 class="section-title">The Hours</h2>
+    <ul class="hours">
+      ${HOURS.map((h) => `
+        <li><a href="#/hour/${iso}/${h.id}">
+          <span class="hname">${esc(h.id === 'ep' && evening.kind === 'ep1' ? 'Evening Prayer I' : h.name)}
+            ${hourSub[h.id] ? `<span class="hsub">${esc(hourSub[h.id])}</span>` : ''}</span>
+          <span class="chev">${ICON.right}</span>
+        </a></li>`).join('')}
+    </ul>
+    ${isToday ? '' : `<p class="fine" style="text-align:center;margin-top:20px"><a href="#/">Go to today</a></p>`}`;
+
+  const sel = document.getElementById('celebrate');
+  if (sel) sel.addEventListener('change', () => {
+    updateSettings({ choices: { ...getSettings().choices, [iso]: sel.value } });
+    renderDay(iso);
+  });
+}
+
+function fmtShort(iso) {
+  const d = fromIso(iso);
+  return `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}`;
+}
+const capital = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+// ---------------- Hour view ----------------
+async function renderHour(iso, hour, token) {
+  const s = getSettings();
+  setTopbar({
+    left: `<a class="icon-btn" href="#/day/${iso}" aria-label="Back to the day">${ICON.back}</a>`,
+    title: HOUR_NAMES[hour],
+    sub: longDate(iso),
+  });
+  main.innerHTML = '<p class="loading">Preparing the Office…</p>';
+  await storeReady;
+  const office = await assembleHour(iso, hour, { ...calendarSettings(s), showSources: s.showSources, invitatoryPsalm: s.invitatoryPsalm }, store);
+  if (token !== renderToken) return;
+
+  const idx = HOURS.findIndex((h) => h.id === hour);
+  const prev = idx > 0 ? { iso, h: HOURS[idx - 1] } : { iso: shiftIso(iso, -1), h: HOURS[HOURS.length - 1] };
+  const next = idx < HOURS.length - 1 ? { iso, h: HOURS[idx + 1] } : { iso: shiftIso(iso, 1), h: HOURS[0] };
+  setTopbar({
+    left: `<a class="icon-btn" href="#/day/${iso}" aria-label="Back to the day">${ICON.back}</a>`,
+    title: office.title,
+    sub: longDate(iso),
+  });
+  const missing = office.blocks.filter((b) => b.k === 'missing').length;
+  main.innerHTML = `
+    <article class="office lit-${office.ctx.cel.color}">
+      <header class="office-head">
+        <h1>${esc(office.title)}</h1>
+        <p>${esc(office.subtitle)}</p>
+      </header>
+      ${missing && s.showSources ? `<p class="rubric block" style="font-family:var(--sans);font-size:13px;text-align:center">${missing} part${missing > 1 ? 's' : ''} of this Hour await the new translation. Tap one to see where the app looked.</p>` : ''}
+      ${blocksToHtml(s.showSources ? office.blocks : office.blocks.filter((b) => b.k !== 'missing'))}
+      <nav class="office-nav">
+        <a href="#/hour/${prev.iso}/${prev.h.id}"><small>Previous</small>${esc(prev.h.name)}</a>
+        <a href="#/hour/${next.iso}/${next.h.id}"><small>Next</small>${esc(next.h.name)}</a>
+      </nav>
+    </article>`;
+  window.scrollTo(0, 0);
+  if (s.keepAwake) requestWakeLock();
+}
+
+let wakeLock = null;
+async function requestWakeLock() {
+  try { wakeLock = await navigator.wakeLock?.request('screen'); } catch { /* unsupported or denied */ }
+}
+function releaseWakeLock() { wakeLock?.release?.().catch(() => {}); wakeLock = null; }
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && parseRoute().view === 'hour' && getSettings().keepAwake) requestWakeLock();
+});
+
+// ---------------- Calendar view ----------------
+function renderCalendar(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const prev = m === 1 ? `${y - 1}-12` : `${y}-${pad2(m - 1)}`;
+  const next = m === 12 ? `${y + 1}-01` : `${y}-${pad2(m + 1)}`;
+  setTopbar({
+    left: `<a class="icon-btn" href="#/calendar/${prev}" aria-label="Previous month">${ICON.left}</a>`,
+    title: `${MONTH_NAMES[m - 1]} ${y}`,
+    sub: REGIONS[getSettings().region]?.name,
+    right: `<a class="icon-btn" href="#/calendar/${next}" aria-label="Next month">${ICON.right}</a>`,
+  });
+  const today = todayIso();
+  const days = getMonth(y, m, calendarSettings());
+  main.innerHTML = `
+    <ul class="cal-list" style="margin-top:8px">
+      ${days.map((d) => {
+        const c = d.celebration;
+        const dt = fromIso(d.iso);
+        const opt = d.options.length > 1 && c.source === 'temporal' ? d.options.slice(1).map((o) => o.title).join('; ') : '';
+        return `<li class="${d.iso === today ? 'today' : ''} ${d.temporal.isSunday ? 'sunday' : ''}">
+          <a href="#/day/${d.iso}">
+            <span class="cal-num"><b>${dt.getUTCDate()}</b><small>${DOW_NAMES[dt.getUTCDay()].slice(0, 3)}</small></span>
+            <span>
+              <span class="cal-title lit-${c.color}"><span class="dot"></span><span>${esc(c.title)}</span></span>
+              <span class="cal-rank">${esc([RANK_LABELS[c.rank], opt && `Optional: ${opt}`].filter(Boolean).join(' · '))}</span>
+            </span>
+          </a></li>`;
+      }).join('')}
+    </ul>`;
+  document.querySelector('.cal-list li.today')?.scrollIntoView({ block: 'center' });
+}
+
+// ---------------- Settings view ----------------
+function renderSettings() {
+  const s = getSettings();
+  setTopbar({ title: 'Settings' });
+  const region = REGIONS[s.region] || REGIONS.usa;
+  const ascSunday = s.ascensionSunday ?? region.options.ascensionSunday;
+  const seg = (name, value, opts) => `<div class="seg" role="group">${opts.map(([v, l]) =>
+    `<button type="button" data-set="${name}" data-value="${v}" aria-pressed="${String(value) === v}">${l}</button>`).join('')}</div>`;
+
+  main.innerHTML = `
+    <div class="settings">
+      <h1>Settings</h1>
+      <h2 class="section-title">Appearance</h2>
+      <div class="card">
+        <div class="row"><span class="lbl">Theme</span>${seg('theme', s.theme, [['system', 'Auto'], ['light', 'Light'], ['dark', 'Dark']])}</div>
+        <div class="row"><label for="textSize">Text size<small id="textSizeVal">${s.textSize}px</small></label>
+          <input id="textSize" type="range" min="14" max="30" step="1" value="${s.textSize}"></div>
+        <div class="row"><label for="keepAwake">Keep screen on while praying<small>Where the browser supports it</small></label>
+          <input id="keepAwake" type="checkbox" ${s.keepAwake ? 'checked' : ''}></div>
+      </div>
+
+      <h2 class="section-title">Calendar</h2>
+      <div class="card">
+        <div class="row"><label for="region">Calendar</label>
+          <select id="region">${Object.entries(REGIONS).map(([k, r]) => `<option value="${k}" ${k === s.region ? 'selected' : ''}>${esc(r.name)}</option>`).join('')}</select></div>
+        <div class="row"><label for="ascension">Ascension<small>Most U.S. provinces transfer it to Sunday</small></label>
+          <select id="ascension"><option value="sun" ${ascSunday ? 'selected' : ''}>Sunday</option><option value="thu" ${!ascSunday ? 'selected' : ''}>Thursday</option></select></div>
+        <div class="row"><label for="invPsalm">Invitatory psalm</label>
+          <select id="invPsalm">${['95', '100', '67', '24'].map((p) => `<option ${p === s.invitatoryPsalm ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+      </div>
+
+      <h2 class="section-title">Local celebrations</h2>
+      <div class="card">
+        <ul class="local-list">${s.localCelebrations.length ? s.localCelebrations.map((l, i) =>
+          `<li><span>${esc(l.date)} · ${esc(l.title)} <small>(${esc({ S: 'Solemnity', F: 'Feast', M: 'Memorial', OM: 'Optional Memorial' }[l.rank])})</small></span>
+           <button class="btn" data-del="${i}">Remove</button></li>`).join('') : '<li><span style="color:var(--muted)">Add your diocesan patron, the anniversary of your church’s dedication, your religious order’s saints, and so on.</span></li>'}</ul>
+        <form class="local-form" id="localForm">
+          <input name="title" placeholder="Title (e.g. Saint Patrick, Principal Patron of the Diocese)" required>
+          <div class="two">
+            <input name="date" type="text" placeholder="MM-DD" pattern="\\d\\d-\\d\\d" required>
+            <select name="rank"><option value="S">Solemnity</option><option value="F">Feast</option><option value="M" selected>Memorial</option><option value="OM">Optional Memorial</option></select>
+          </div>
+          <div class="two">
+            <select name="color"><option value="white">White</option><option value="red">Red</option><option value="violet">Violet</option><option value="green">Green</option></select>
+            <select name="commons"><option value="">Common…</option><option>pastors</option><option>martyr</option><option>martyrs</option><option>virgins</option><option>holy-men</option><option>holy-women</option><option>religious</option><option>doctors</option><option>bvm</option><option>apostles</option><option>dedication</option></select>
+          </div>
+          <button class="btn primary" type="submit">Add celebration</button>
+        </form>
+      </div>
+
+      <h2 class="section-title">Text</h2>
+      <div class="card">
+        <div class="row"><label for="showSources">Show text sources<small>Shows where each text came from and what is still missing. Useful while importing.</small></label>
+          <input id="showSources" type="checkbox" ${s.showSources ? 'checked' : ''}></div>
+        <div class="row"><span class="lbl">Downloaded text<small id="contentInfo">Checking…</small></span>
+          <button class="btn" id="downloadAll">Download all</button></div>
+        <div class="row"><span class="lbl">Optional memorial choices<small>${Object.keys(s.choices).length} saved</small></span>
+          <button class="btn" id="clearChoices">Clear</button></div>
+      </div>
+      <p class="fine">Settings are stored on this device only. The liturgical calendar is computed on the device and works offline.</p>
+    </div>`;
+
+  main.querySelectorAll('[data-set]').forEach((b) => b.addEventListener('click', () => {
+    updateSettings({ [b.dataset.set]: b.dataset.value });
+    renderSettings();
+  }));
+  const ts = document.getElementById('textSize');
+  ts.addEventListener('input', () => {
+    updateSettings({ textSize: Number(ts.value) });
+    document.getElementById('textSizeVal').textContent = `${ts.value}px`;
+  });
+  const bind = (id, fn, ev = 'change') => document.getElementById(id).addEventListener(ev, fn);
+  bind('keepAwake', (e) => updateSettings({ keepAwake: e.target.checked }));
+  bind('showSources', (e) => updateSettings({ showSources: e.target.checked }));
+  bind('region', (e) => { updateSettings({ region: e.target.value, ascensionSunday: null }); renderSettings(); });
+  bind('ascension', (e) => updateSettings({ ascensionSunday: e.target.value === 'sun' }));
+  bind('invPsalm', (e) => updateSettings({ invitatoryPsalm: e.target.value }));
+  bind('clearChoices', () => { updateSettings({ choices: {} }); toast('Choices cleared'); renderSettings(); }, 'click');
+  bind('downloadAll', async () => {
+    await storeReady;
+    toast('Downloading…');
+    await store.loadAll();
+    toast('All available text is saved for offline use');
+    showContentInfo();
+  }, 'click');
+  main.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => {
+    const list = [...getSettings().localCelebrations];
+    list.splice(Number(b.dataset.del), 1);
+    updateSettings({ localCelebrations: list });
+    renderSettings();
+  }));
+  bind('localForm', (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const entry = Object.fromEntries(f.entries());
+    if (!/^\d\d-\d\d$/.test(entry.date)) return toast('Date must look like 03-17');
+    updateSettings({ localCelebrations: [...getSettings().localCelebrations, entry] });
+    toast('Added');
+    renderSettings();
+  }, 'submit');
+  showContentInfo();
+}
+
+async function showContentInfo() {
+  await storeReady;
+  const el = document.getElementById('contentInfo');
+  if (!el) return;
+  const st = store.stats();
+  el.textContent = st.shards
+    ? `Text version ${st.version} · ${st.shards} file${st.shards > 1 ? 's' : ''} · ${st.entriesLoaded} entries loaded`
+    : 'No text installed yet';
+}
+
+// ---------------- Misc ----------------
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+onSettingsChange((s) => applyTheme(s));
+applyTheme();
+window.addEventListener('hashchange', render);
+render();
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('sw.js').catch((e) => console.warn('Service worker not registered', e));
+}

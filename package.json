@@ -1,0 +1,15 @@
+{
+  "name": "breviary-pwa",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Liturgy of the Hours progressive web app (scaffolding awaiting the new translation).",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "test": "node --test",
+    "build:content": "node tools/build-content.mjs",
+    "coverage": "node tools/coverage.mjs",
+    "skeleton": "node tools/skeleton.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

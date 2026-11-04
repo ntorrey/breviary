@@ -1,0 +1,96 @@
+%% =====================================================================
+%% THE ORDINARY: fixed texts used in every Hour.
+%%
+%% INTERIM CONTENT. Everything below is public-domain wording (traditional
+%% English prayers, Douay-Rheims, or Latin) so the app has something to show.
+%% Replace it all with the new translation once it is licensed.
+%% =====================================================================
+
+=== ordinary
+--- intro_inv
+V/ O Lord, thou wilt open my lips.
+R/ And my mouth shall declare thy praise.
+
+--- intro
+V/ O God, come to my assistance.
+R/ O Lord, make haste to help me.
+Glory be to the Father, and to the Son, and to the Holy Spirit.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
+Alleluia.
+
+--- intro@lent
+V/ O God, come to my assistance.
+R/ O Lord, make haste to help me.
+Glory be to the Father, and to the Son, and to the Holy Spirit.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
+
+--- intro@triduum
+V/ O God, come to my assistance.
+R/ O Lord, make haste to help me.
+Glory be to the Father, and to the Son, and to the Holy Spirit.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
+
+--- gloria
+Glory be to the Father, and to the Son, *
+  and to the Holy Spirit.
+As it was in the beginning, is now, *
+  and ever shall be, world without end. Amen.
+
+--- our_father
+Our Father, who art in heaven, hallowed be thy name;
+thy kingdom come; thy will be done on earth as it is in heaven.
+Give us this day our daily bread;
+and forgive us our trespasses, as we forgive those who trespass against us;
+and lead us not into temptation, but deliver us from evil.
+
+--- dismissal
+! When a priest or deacon presides, he dismisses the people with a blessing. Otherwise:
+Dominus nos benedicat, et ab omni malo defendat, et ad vitam aeternam perducat.
+R/ Amen.
+
+--- conclusion
+V/ Benedicamus Domino.
+R/ Deo gratias.
+
+--- examen
+! A brief examination of conscience may be made here. In a common celebration, a penitential act may follow.
+
+--- blessing
+Noctem quietam et finem perfectum concedat nobis Dominus omnipotens.
+R/ Amen.
+
+--- marian@advent
+Alma Redemptoris Mater, quae pervia caeli
+porta manes, et stella maris, succurre cadenti,
+surgere qui curat, populo: tu quae genuisti,
+natura mirante, tuum sanctum Genitorem,
+Virgo prius ac posterius, Gabrielis ab ore
+sumens illud Ave, peccatorum miserere.
+
+--- marian@lent
+Ave, Regina caelorum,
+Ave, Domina angelorum:
+Salve, radix, salve, porta,
+Ex qua mundo lux est orta:
+Gaude, Virgo gloriosa,
+Super omnes speciosa,
+Vale, o valde decora,
+Et pro nobis Christum exora.
+
+--- marian@easter
+Regina caeli, laetare, alleluia.
+Quia quem meruisti portare, alleluia.
+Resurrexit, sicut dixit, alleluia.
+Ora pro nobis Deum, alleluia.
+
+--- marian@ordinary
+Salve, Regina, mater misericordiae,
+vita, dulcedo, et spes nostra, salve.
+Ad te clamamus exsules filii Hevae,
+ad te suspiramus, gementes et flentes
+in hac lacrimarum valle.
+Eia, ergo, advocata nostra,
+illos tuos misericordes oculos ad nos converte;
+et Iesum, benedictum fructum ventris tui,
+nobis post hoc exsilium ostende.
+O clemens, O pia, O dulcis Virgo Maria.
