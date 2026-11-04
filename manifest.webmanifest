@@ -7,11 +7,9 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f7f3ea",
-  "theme_color": "#f7f3ea",
   "user_preferences": {
     "color_scheme_dark": {
-      "background_color": "#16130f",
-      "theme_color": "#16130f"
+      "background_color": "#16130f"
     }
   },
   "icons": [

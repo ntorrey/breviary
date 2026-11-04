@@ -96,7 +96,16 @@
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
 /* The page background also fills any area the phone draws behind its own bars. */
-html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+  /* Scrollbar: thin and almost transparent, so it doesn't distract from the text. */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 14%, transparent) transparent;
+}
+::-webkit-scrollbar { width: 3px; height: 3px; background: transparent; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--muted) 14%, transparent); border-radius: 3px; }
 body {
   margin: 0;
   background: var(--bg);
@@ -307,9 +316,6 @@ body.reading .topbar .title strong { font-size: 13px; font-weight: 500; color: v
 body.reading .topbar .title small { display: none; }
 /* Slides away while scrolling down through the text; returns when scrolling up. */
 body.reading.bar-hidden .topbar { transform: translateY(-100%); opacity: 0; }
-html:has(body.reading) { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 35%, transparent) transparent; }
-body.reading ::-webkit-scrollbar { width: 4px; }
-body.reading ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--muted) 35%, transparent); border-radius: 4px; }
 
 /* ---------- Full-screen reading mode ---------- */
 body.focus .topbar, body.focus .tabbar { display: none; }

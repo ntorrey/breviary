@@ -81,6 +81,10 @@ The app can hold several translations side by side and switch between them in **
 
 The structure is the same for every translation, so switching changes the words and nothing else. See [docs/CONTENT-FORMAT.md](docs/CONTENT-FORMAT.md#translations-editions).
 
+### Android system bar colour
+
+The manifest deliberately has no `theme_color`. Chrome on Android paints the bottom navigation bar of an installed app with that colour and fixes it at install time, so it could never follow the app's theme. Without it, the bar follows the phone's light or dark setting. The top status bar is coloured at runtime from the page's `<meta name="theme-color">`, which `js/settings.js` keeps in step with the chosen theme. If you change the manifest, an already-installed app picks the change up only after Chrome rebuilds it: open `chrome://webapks` → **Update**, or reinstall.
+
 ### Full-screen reading
 
 The button at the top right of any Hour hides everything but the text. Tap the text to show the exit button, or press Esc. It doesn't use the browser's own full-screen mode, because on Android that always shows a "drag from the top to exit" message. Opened from the home-screen icon, the app has no browser bars, so only the text shows. Settings → **Open Hours full screen** makes this the default.
