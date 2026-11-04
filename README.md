@@ -83,7 +83,7 @@ The structure is the same for every translation, so switching changes the words 
 
 ### Android system bar colour
 
-The manifest deliberately has no `theme_color`. Chrome on Android paints the bottom navigation bar of an installed app with that colour and fixes it at install time, so it could never follow the app's theme. Without it, the bar follows the phone's light or dark setting. The top status bar is coloured at runtime from the page's `<meta name="theme-color">`, which `js/settings.js` keeps in step with the chosen theme. If you change the manifest, an already-installed app picks the change up only after Chrome rebuilds it: open `chrome://webapks` → **Update**, or reinstall.
+The manifest's `theme_color` is fixed at black (`#000000`) by choice. Chrome on Android paints the bottom navigation bar of an installed app with that colour and fixes it at install time, so it can't follow the app's in-app theme. Black was chosen over following the phone's setting. The top status bar is coloured at runtime from the page's `<meta name="theme-color">`, which `js/settings.js` keeps in step with the chosen theme. If you change the manifest, an already-installed app picks the change up only after Chrome rebuilds it: open `chrome://webapks` → **Update**, or reinstall.
 
 ### Full-screen reading
 
