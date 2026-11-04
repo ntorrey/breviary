@@ -96,7 +96,8 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
-    private void setImmersive(boolean on) {
+    // (Not named setImmersive: Activity already has a final method of that name.)
+    private void applyFullScreen(boolean on) {
         if (insetsController == null) return;
         if (on) insetsController.hide(WindowInsetsCompat.Type.systemBars());
         else insetsController.show(WindowInsetsCompat.Type.systemBars());
@@ -128,7 +129,7 @@ public class MainActivity extends BridgeActivity {
         /** Reading mode: hide (true) or restore (false) the status and navigation bars. */
         @JavascriptInterface
         public void setImmersive(boolean on) {
-            runOnUiThread(() -> MainActivity.this.setImmersive(on));
+            runOnUiThread(() -> applyFullScreen(on));
         }
 
         /** "Keep screen on while praying" (the WebView has no Wake Lock API). */
