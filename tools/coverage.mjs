@@ -6,6 +6,7 @@
 // Usage: npm run coverage                 (current year, USA calendar)
 //        npm run coverage -- 2027 2028    (specific years)
 //        npm run coverage -- --region=general
+//        npm run coverage -- --edition=new      (a specific translation)
 
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -14,11 +15,14 @@ import { toIso } from '../js/calendar/dates.js';
 import { nodeStore, ROOT } from './lib/node-store.mjs';
 
 const args = process.argv.slice(2);
-const region = (args.find((a) => a.startsWith('--region=')) || '--region=usa').split('=')[1];
+const opt = (name, dflt) => (args.find((a) => a.startsWith(`--${name}=`)) || `--${name}=${dflt}`).split('=')[1];
+const region = opt('region', 'usa');
 const years = args.filter((a) => /^\d{4}$/.test(a)).map(Number);
 if (!years.length) years.push(new Date().getFullYear());
 
-const store = await nodeStore();
+const store = await nodeStore(opt('edition', '') || undefined);
+const edition = store.edition.id;
+console.log(`Edition: ${store.edition.name} (${edition})`);
 let total = 0, filled = 0;
 const gaps = new Map(); // first place looked -> { label, count, example }
 
@@ -43,8 +47,8 @@ for (const y of years) {
 const pct = total ? ((filled / total) * 100).toFixed(1) : '0';
 const sorted = [...gaps.values()].sort((a, b) => b.count - a.count);
 const lines = [
-  `# Text coverage — ${years.join(', ')} (${region})`, '',
-  `Generated ${new Date().toISOString()}. Content version ${store.stats().version}.`, '',
+  `# Text coverage — ${store.edition.name}, ${years.join(', ')} (${region})`, '',
+  `Generated ${new Date().toISOString()}. Edition "${edition}", version ${store.stats().version}.`, '',
   `**${filled} of ${total} text elements present (${pct}%).** ${sorted.length} distinct gaps.`, '',
   'Each gap lists the places the app looked, in order. Filling *any* of them closes the gap;',
   'usually the last one (the most general source, e.g. the psalter or a common) is the right place.', '',
@@ -53,7 +57,7 @@ const lines = [
   ...sorted.map((g) => `| ${g.count} | ${g.label} | ${g.tried.map((t) => `\`${t}\``).join(' → ')} | ${g.example} |`),
 ];
 await mkdir(join(ROOT, 'reports'), { recursive: true });
-const file = join(ROOT, 'reports', `coverage-${years.join('-')}-${region}.md`);
+const file = join(ROOT, 'reports', `coverage-${edition}-${years.join('-')}-${region}.md`);
 await writeFile(file, lines.join('\n') + '\n');
 console.log(`${filled}/${total} elements present (${pct}%). ${sorted.length} distinct gaps.`);
 console.log(`Report: ${file}`);

@@ -9,6 +9,8 @@ export const DEFAULTS = {
   invitatoryPsalm: '95',    // 95 | 100 | 67 | 24
   showSources: true,        // show where each text came from / what is missing
   keepAwake: false,         // keep the screen on while reading an Hour
+  focusOnOpen: false,       // open every Hour in full-screen reading mode
+  edition: null,            // text edition (translation) id; null = the default one
   choices: {},              // { 'YYYY-MM-DD': celebrationId } for optional memorials
   localCelebrations: [],    // [{ date: 'MM-DD', title, rank, color, commons }]
 };

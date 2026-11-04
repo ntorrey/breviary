@@ -1,0 +1,6 @@
+{
+  "name": "Liturgy of the Hours (current translation)",
+  "description": "The current U.S. edition (ICEL translation, Grail psalms).",
+  "order": 1,
+  "default": true
+}

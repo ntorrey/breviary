@@ -71,7 +71,19 @@ npm run coverage -- 2027
 
 Reports what is still missing, ranked by impact.
 
-`content-src/ordinary.txt` currently holds **interim public-domain texts** (traditional prayers, Latin Marian antiphons). `content-src/samples/` shows a fully filled-in Hour with placeholder words. To see it, open Morning Prayer of the First Sunday of Advent 2026. Delete the samples folder when real text arrives.
+### Translations
+
+The app can hold several translations side by side and switch between them in **Settings → Translation**. Each one is a folder in `content-src/`:
+
+- `current/`: the current U.S. *Liturgy of the Hours*. It's marked as the default, so it's used automatically once it has text. Empty for now, because the text is copyrighted and has to be loaded under license.
+- `new/`: the new translation, once it's released and licensed. To make it the default, move `"default": true` from `current/edition.json` to `new/edition.json`.
+- `placeholder/`: what the app shows today. It has public-domain prayers (traditional English, Latin Marian antiphons), plus one fully filled-in sample Hour: Morning Prayer of the First Sunday of Advent 2026.
+
+The structure is the same for every translation, so switching changes the words and nothing else. See [docs/CONTENT-FORMAT.md](docs/CONTENT-FORMAT.md#translations-editions).
+
+### Full-screen reading
+
+The button at the top right of any Hour hides everything but the text. On Android and desktop it also enters true full screen. Tap the text to show the exit button, or press Esc. Settings → **Open Hours full screen** makes this the default.
 
 ## Project layout
 
@@ -84,8 +96,8 @@ js/calendar/                              liturgical calendar engine and saints 
 js/office/assemble.js                     which text goes where in each Hour (GILH rules)
 js/office/render.js                       text markup → HTML
 js/content/store.js                       loads text shards on demand
-content-src/                              editable text sources (what you edit)
-content/                                  compiled JSON (generated; what the app loads)
+content-src/<translation>/                editable text sources, one folder per translation
+content/<translation>/, editions.json     compiled JSON (generated; what the app loads)
 tools/                                    dev server, content build, skeleton, coverage, icons
 tests/                                    node --test suites
 ```

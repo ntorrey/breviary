@@ -1,0 +1,31 @@
+{
+  "editions": [
+    {
+      "id": "current",
+      "name": "Liturgy of the Hours (current translation)",
+      "description": "The current U.S. edition (ICEL translation, Grail psalms).",
+      "default": true,
+      "order": 1,
+      "entries": 0,
+      "version": "da39a3ee5e6b"
+    },
+    {
+      "id": "new",
+      "name": "Liturgy of the Hours (new translation)",
+      "description": "The new English translation, with the Abbey Psalms and Canticles.",
+      "default": false,
+      "order": 2,
+      "entries": 0,
+      "version": "da39a3ee5e6b"
+    },
+    {
+      "id": "placeholder",
+      "name": "Placeholder texts",
+      "description": "Public-domain prayers and sample text, used until a licensed translation is loaded.",
+      "default": false,
+      "order": 3,
+      "entries": 6,
+      "version": "2769b4670cc8"
+    }
+  ]
+}

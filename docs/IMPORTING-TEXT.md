@@ -1,6 +1,6 @@
 # Getting the new translation into the app
 
-The app is ready for the text: every Hour of every day already knows *which* text belongs where. What remains is getting the words of the new edition into `content-src/` in the source format (see [CONTENT-FORMAT.md](CONTENT-FORMAT.md)). This guide covers how to do that, from best to worst option.
+The app is ready for the text: every Hour of every day already knows *which* text belongs where. What remains is getting the words into `content-src/new/` (the new translation) or `content-src/current/` (the current translation) in the source format (see [CONTENT-FORMAT.md](CONTENT-FORMAT.md)). This guide covers how to do that, from best to worst option.
 
 ## Step 0 — Permission comes first
 
@@ -65,9 +65,9 @@ Claude can turn a chunk of extracted text into the source format: splitting fiel
 
 ```
 npm run skeleton          # 1. fill-in-the-blank files in content-src/_skeleton/
-                          # 2. copy a file out of _skeleton/, fill it (by hand or by converter)
-npm run build:content     # 3. compile to content/*.json and list warnings
-npm run coverage -- 2027  # 4. see what is still missing, ranked by impact
+                          # 2. copy a file into content-src/new/ (or current/) and fill it
+npm run build:content     # 3. compile every translation and list warnings
+npm run coverage -- --edition=new 2027   # 4. what is still missing, ranked by impact
 npm start                 # 5. proofread in the app with Settings → "Show text sources"
 ```
 

@@ -1,10 +1,11 @@
 // Service worker: makes the app installable and usable offline.
 // - App files: served from cache, refreshed in the background (stale-while-revalidate).
-// - content/index.json: network first, so new text releases are noticed.
+// - content/editions.json and each content/<edition>/index.json: network first,
+//   so new text releases are noticed.
 // - content shards: cache first (their URLs carry ?v=<version>, so new versions get new URLs).
 // Bump SHELL_VERSION when you change the list of app files.
 
-const SHELL_VERSION = 'shell-v1';
+const SHELL_VERSION = 'shell-v2';
 const CONTENT_CACHE = 'content-v1';
 const SHELL = [
   './',
@@ -44,7 +45,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  if (url.pathname.endsWith('/content/index.json')) {
+  if (url.pathname.includes('/content/') && /\/(index|editions)\.json$/.test(url.pathname)) {
     event.respondWith(networkFirst(req, CONTENT_CACHE));
   } else if (url.pathname.includes('/content/')) {
     event.respondWith(cacheFirst(req, CONTENT_CACHE));

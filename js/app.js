@@ -9,18 +9,44 @@ import { getSettings, updateSettings, calendarSettings, applyTheme, onSettingsCh
 
 const main = document.getElementById('main');
 const topbar = document.getElementById('topbar');
-const store = new ContentStore(async (p) => {
-  const r = await fetch(`content/${p}`);
-  if (!r.ok) throw new Error(`${r.status} ${p}`);
-  return r.json();
-});
-const storeReady = store.init();
+
+// ---------------- Translations (text editions) ----------------
+// content/editions.json lists the editions; each lives in content/<id>/.
+let editions = [];
+let store = null;
+let storeReady = null;
+const editionsReady = fetch('content/editions.json')
+  .then((r) => (r.ok ? r.json() : { editions: [] }))
+  .catch(() => ({ editions: [] }))
+  .then((d) => { editions = d.editions || []; });
+
+/** The edition in use: the one chosen in Settings if it has text, else the first that does. */
+function activeEdition() {
+  const ready = editions.filter((e) => e.entries > 0);
+  const want = getSettings().edition;
+  return ready.find((e) => e.id === want) || ready.find((e) => e.default) || ready[0] || editions[0] || { id: 'interim', name: 'Placeholder texts' };
+}
+
+function openStore() {
+  storeReady = editionsReady.then(() => {
+    const ed = activeEdition();
+    store = new ContentStore(async (p) => {
+      const r = await fetch(`content/${ed.id}/${p}`);
+      if (!r.ok) throw new Error(`${r.status} ${p}`);
+      return r.json();
+    });
+    return store.init();
+  });
+  return storeReady;
+}
+openStore();
 
 const ICON = {
+  expand: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   left: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
   right: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
   back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
-  today: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg>',
+  collapse: '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
 };
 
 const SEASON_NAMES = { advent: 'Advent', christmas: 'Christmas Time', ordinary: 'Ordinary Time', lent: 'Lent', triduum: 'Paschal Triduum', easter: 'Easter Time' };
@@ -51,6 +77,7 @@ async function render() {
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
   releaseWakeLock();
+  if (route.view !== 'hour' && focusMode) setFocus(false);
   try {
     if (route.view === 'day') renderDay(route.iso);
     else if (route.view === 'hour') await renderHour(route.iso, route.hour, token);
@@ -162,7 +189,9 @@ async function renderHour(iso, hour, token) {
     left: `<a class="icon-btn" href="#/day/${iso}" aria-label="Back to the day">${ICON.back}</a>`,
     title: office.title,
     sub: longDate(iso),
+    right: `<button class="icon-btn" id="focusBtn" type="button" aria-label="Full-screen reading" title="Full-screen reading">${ICON.expand}</button>`,
   });
+  document.getElementById('focusBtn').addEventListener('click', () => setFocus(true));
   const missing = office.blocks.filter((b) => b.k === 'missing').length;
   main.innerHTML = `
     <article class="office lit-${office.ctx.cel.color}">
@@ -170,7 +199,7 @@ async function renderHour(iso, hour, token) {
         <h1>${esc(office.title)}</h1>
         <p>${esc(office.subtitle)}</p>
       </header>
-      ${missing && s.showSources ? `<p class="rubric block" style="font-family:var(--sans);font-size:13px;text-align:center">${missing} part${missing > 1 ? 's' : ''} of this Hour await the new translation. Tap one to see where the app looked.</p>` : ''}
+      ${missing && s.showSources ? `<p class="rubric block missing-note" style="font-family:var(--sans);font-size:13px;text-align:center">${missing === 1 ? '1 part of this Hour is' : `${missing} parts of this Hour are`} not yet loaded in this translation. Tap one to see where the app looked.</p>` : ''}
       ${blocksToHtml(s.showSources ? office.blocks : office.blocks.filter((b) => b.k !== 'missing'))}
       <nav class="office-nav">
         <a href="#/hour/${prev.iso}/${prev.h.id}"><small>Previous</small>${esc(prev.h.name)}</a>
@@ -179,7 +208,55 @@ async function renderHour(iso, hour, token) {
     </article>`;
   window.scrollTo(0, 0);
   if (s.keepAwake) requestWakeLock();
+  if (s.focusOnOpen && !focusMode) setFocus(true);
 }
+
+// ---------------- Full-screen reading mode ----------------
+// Hides the bars and every editing aid so only the text remains. Where the
+// browser allows it (Android, desktop) it also goes truly full screen; on an
+// iPhone the installed app already has no browser bars.
+let focusMode = false;
+let nativeFullscreen = false;
+const focusExit = document.createElement('button');
+focusExit.type = 'button';
+focusExit.className = 'focus-exit';
+focusExit.innerHTML = `${ICON.collapse}<span>Exit full screen</span>`;
+focusExit.addEventListener('click', (e) => { e.stopPropagation(); setFocus(false); });
+document.body.appendChild(focusExit);
+let exitTimer;
+
+function showFocusExit() {
+  focusExit.classList.add('visible');
+  clearTimeout(exitTimer);
+  exitTimer = setTimeout(() => focusExit.classList.remove('visible'), 2500);
+}
+
+function setFocus(on) {
+  focusMode = on;
+  document.body.classList.toggle('focus', on);
+  if (on) {
+    showFocusExit();
+    const req = document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
+    req?.then(() => { nativeFullscreen = true; }).catch(() => {});
+  } else {
+    focusExit.classList.remove('visible');
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    nativeFullscreen = false;
+  }
+}
+
+// Leaving the browser's full screen (back gesture, Esc) also leaves reading mode.
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && nativeFullscreen && focusMode) setFocus(false);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focusMode) setFocus(false); });
+// In reading mode, a tap on the text briefly shows the exit button.
+main.addEventListener('click', (e) => {
+  if (focusMode && !e.target.closest('a, button, summary, select, input')) {
+    if (focusExit.classList.contains('visible')) focusExit.classList.remove('visible');
+    else showFocusExit();
+  }
+});
 
 let wakeLock = null;
 async function requestWakeLock() {
@@ -241,6 +318,8 @@ function renderSettings() {
           <input id="textSize" type="range" min="14" max="30" step="1" value="${s.textSize}"></div>
         <div class="row"><label for="keepAwake">Keep screen on while praying<small>Where the browser supports it</small></label>
           <input id="keepAwake" type="checkbox" ${s.keepAwake ? 'checked' : ''}></div>
+        <div class="row"><label for="focusOnOpen">Open Hours full screen<small>Show only the text. Tap the text to find the exit button. You can also use the full-screen button at the top of any Hour.</small></label>
+          <input id="focusOnOpen" type="checkbox" ${s.focusOnOpen ? 'checked' : ''}></div>
       </div>
 
       <h2 class="section-title">Calendar</h2>
@@ -274,6 +353,8 @@ function renderSettings() {
 
       <h2 class="section-title">Text</h2>
       <div class="card">
+        <div class="row"><label for="edition">Translation<small id="editionInfo"></small></label>
+          <select id="edition"></select></div>
         <div class="row"><label for="showSources">Show text sources<small>Shows where each text came from and what is still missing. Useful while importing.</small></label>
           <input id="showSources" type="checkbox" ${s.showSources ? 'checked' : ''}></div>
         <div class="row"><span class="lbl">Downloaded text<small id="contentInfo">Checking…</small></span>
@@ -295,6 +376,14 @@ function renderSettings() {
   });
   const bind = (id, fn, ev = 'change') => document.getElementById(id).addEventListener(ev, fn);
   bind('keepAwake', (e) => updateSettings({ keepAwake: e.target.checked }));
+  bind('focusOnOpen', (e) => updateSettings({ focusOnOpen: e.target.checked }));
+  bind('edition', async (e) => {
+    updateSettings({ edition: e.target.value });
+    await openStore();
+    toast(`Now using: ${activeEdition().name}`);
+    renderSettings();
+  });
+  fillEditionSelect();
   bind('showSources', (e) => updateSettings({ showSources: e.target.checked }));
   bind('region', (e) => { updateSettings({ region: e.target.value, ascensionSunday: null }); renderSettings(); });
   bind('ascension', (e) => updateSettings({ ascensionSunday: e.target.value === 'sun' }));
@@ -325,13 +414,24 @@ function renderSettings() {
   showContentInfo();
 }
 
+async function fillEditionSelect() {
+  await editionsReady;
+  const sel = document.getElementById('edition');
+  if (!sel) return;
+  const active = activeEdition();
+  sel.innerHTML = editions.map((e) => `<option value="${esc(e.id)}" ${e.id === active.id ? 'selected' : ''} ${e.entries ? '' : 'disabled'}>${esc(e.name)}${e.entries ? '' : ' (not yet loaded)'}</option>`).join('')
+    || '<option>None installed</option>';
+  const info = document.getElementById('editionInfo');
+  if (info) info.textContent = active.description || '';
+}
+
 async function showContentInfo() {
   await storeReady;
   const el = document.getElementById('contentInfo');
   if (!el) return;
   const st = store.stats();
   el.textContent = st.shards
-    ? `Text version ${st.version} · ${st.shards} file${st.shards > 1 ? 's' : ''} · ${st.entriesLoaded} entries loaded`
+    ? `${activeEdition().name}, version ${st.version} · ${st.shards} file${st.shards > 1 ? 's' : ''} · ${st.entriesLoaded} entries loaded`
     : 'No text installed yet';
 }
 

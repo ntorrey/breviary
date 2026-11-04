@@ -1,6 +1,30 @@
 # Content format and key scheme
 
-## Source files (`content-src/**/*.txt`)
+## Translations (editions)
+
+Each translation is a folder in `content-src/` containing an `edition.json`:
+
+```
+content-src/
+  current/       edition.json + .txt files  - current U.S. translation (empty until licensed)
+  new/           edition.json + .txt files  - the new translation (empty until released)
+  placeholder/   edition.json + .txt files  - public-domain placeholders and samples
+  _skeleton/     fill-in-the-blank templates (not built)
+```
+
+`edition.json` fields:
+
+| Field | Meaning |
+|---|---|
+| `name` | Shown in Settings → Translation |
+| `description` | Shown under the selector |
+| `order` | Position in the list |
+| `default` | `true` on the edition used when the reader hasn't chosen one. If it has no text yet, the first edition with text is used. |
+| `fallback` | Optional id of another edition that fills in anything this one lacks. Useful while an edition is only partly entered, but it mixes translations within one Hour, so use it with care. |
+
+`npm run build:content` builds each edition into `content/<id>/` and lists them all in `content/editions.json`. Editions with no text appear in Settings as "not yet loaded" and can't be selected. The keys and fields below are the same for every edition, so switching translation changes only the words, never the structure.
+
+## Source files (`content-src/<edition>/**/*.txt`)
 
 ```
 %% A comment line (ignored)

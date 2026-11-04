@@ -251,6 +251,24 @@ body.reading { padding-bottom: env(safe-area-inset-bottom); }
 .local-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .fine { color: var(--muted); font-size: 12px; margin: 6px 4px 18px; }
 
+/* ---------- Full-screen reading mode ---------- */
+body.focus .topbar, body.focus .tabbar { display: none; }
+body.focus .missing, body.focus .src, body.focus .missing-note { display: none; }
+body.focus main { padding-top: calc(12px + env(safe-area-inset-top)); }
+body.focus .office-nav { opacity: .55; }
+.focus-exit {
+  position: fixed; z-index: 30;
+  top: calc(10px + env(safe-area-inset-top)); right: 12px;
+  display: none; align-items: center; gap: 6px;
+  padding: 8px 14px 8px 10px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer;
+  box-shadow: 0 4px 16px rgb(0 0 0 / .15);
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.focus-exit svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+body.focus .focus-exit { display: inline-flex; }
+body.focus .focus-exit.visible { opacity: 1; pointer-events: auto; }
+
 .toast {
   position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
   transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
