@@ -48,6 +48,10 @@ Then on the phone:
 
 > Once real text is loaded, check the license before putting it on a public URL (see [docs/IMPORTING-TEXT.md](docs/IMPORTING-TEXT.md#step-0--permission-comes-first)).
 
+### Android app (APK)
+
+There is also an installable Android app: [download Breviary.apk](https://github.com/ntorrey/breviary/releases/download/android/Breviary.apk). It wraps the live site, so web updates reach it automatically. Its bottom bar is always black, and its top bar follows the app's theme. See [android-app/README.md](android-app/README.md) for how it's built and signed.
+
 ## Adding the text
 
 - [docs/IMPORTING-TEXT.md](docs/IMPORTING-TEXT.md): licensing, and strategies for getting the new translation in, from best (structured file from the publisher) to worst (typing).

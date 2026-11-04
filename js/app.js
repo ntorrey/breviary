@@ -5,7 +5,9 @@ import { todayIso, longDate, fromIso, toIso, addDays, MONTH_NAMES, DOW_NAMES, pa
 import { HOURS, HOUR_NAMES, assembleHour } from './office/assemble.js';
 import { blocksToHtml, escapeHtml as esc } from './office/render.js';
 import { ContentStore } from './content/store.js';
-import { getSettings, updateSettings, calendarSettings, applyTheme, onSettingsChange } from './settings.js';
+import { getSettings, updateSettings, calendarSettings, applyTheme, onSettingsChange, inAndroidApp } from './settings.js';
+
+const APK_URL = 'https://github.com/ntorrey/breviary/releases/download/android/Breviary.apk';
 
 const main = document.getElementById('main');
 const topbar = document.getElementById('topbar');
@@ -272,9 +274,14 @@ main.addEventListener('click', (e) => {
 
 let wakeLock = null;
 async function requestWakeLock() {
+  try { window.BreviaryAndroid?.keepScreenOn(true); } catch { /* not in the Android app */ }
   try { wakeLock = await navigator.wakeLock?.request('screen'); } catch { /* unsupported or denied */ }
 }
-function releaseWakeLock() { wakeLock?.release?.().catch(() => {}); wakeLock = null; }
+function releaseWakeLock() {
+  try { window.BreviaryAndroid?.keepScreenOn(false); } catch { /* not in the Android app */ }
+  wakeLock?.release?.().catch(() => {});
+  wakeLock = null;
+}
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && parseRoute().view === 'hour' && getSettings().keepAwake) requestWakeLock();
 });
@@ -381,6 +388,8 @@ function renderSettings() {
       <h2 class="section-title">About</h2>
       <div class="card">
         <div class="row"><span class="lbl">App version<small id="appBuilt"></small></span><strong id="appVersion">…</strong></div>
+        ${inAndroidApp ? '' : `<div class="row"><span class="lbl">Android app<small>Download the APK and open it on an Android phone to install.</small></span>
+          <a class="btn" href="${APK_URL}" rel="noopener">Download</a></div>`}
       </div>
       <p class="fine">Settings are stored on this device only. The liturgical calendar is computed on the device and works offline.</p>
     </div>`;

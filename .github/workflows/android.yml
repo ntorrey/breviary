@@ -1,0 +1,103 @@
+# Builds the signed Android app (APK) and publishes it to the "android" GitHub
+# release, at a fixed download address:
+#   https://github.com/ntorrey/breviary/releases/download/android/Breviary.apk
+#
+# The app loads the live site, so ordinary updates to the web app reach it
+# without a new APK. A new APK is built only when the Android project changes
+# (or when run by hand from the Actions tab).
+#
+# Needs these repository secrets (see android-app/README.md):
+#   BREVIARY_KEYSTORE_BASE64, BREVIARY_KEYSTORE_PASSWORD, BREVIARY_KEY_ALIAS
+name: Build Android app
+
+on:
+  push:
+    branches: [main]
+    paths: ['android-app/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: android-app/package-lock.json
+
+      - name: Install Capacitor
+        run: npm ci
+
+      - name: Prepare Android project
+        run: npx cap sync android
+
+      - name: Check signing secrets
+        env:
+          KS: ${{ secrets.BREVIARY_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KS" ]; then
+            echo "::error::The signing secrets are not set. See android-app/README.md."
+            exit 1
+          fi
+
+      - name: Build signed APK
+        working-directory: android-app/android
+        env:
+          KS_B64: ${{ secrets.BREVIARY_KEYSTORE_BASE64 }}
+          BREVIARY_KEYSTORE_PASSWORD: ${{ secrets.BREVIARY_KEYSTORE_PASSWORD }}
+          BREVIARY_KEY_ALIAS: ${{ secrets.BREVIARY_KEY_ALIAS }}
+          BREVIARY_VERSION_CODE: ${{ github.run_number }}
+          BREVIARY_VERSION_NAME: 1.0.${{ github.run_number }}
+        run: |
+          export BREVIARY_KEYSTORE="$RUNNER_TEMP/breviary-release.p12"
+          echo "$KS_B64" | base64 -d > "$BREVIARY_KEYSTORE"
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          rm -f "$BREVIARY_KEYSTORE"
+
+      - name: Verify signature
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs "$APK"
+          cp "$APK" "$RUNNER_TEMP/Breviary.apk"
+
+      - name: Publish to the "android" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: 1.0.${{ github.run_number }}
+        run: |
+          NOTES="Breviary for Android, version ${VERSION} (built $(date -u +%Y-%m-%d), commit ${GITHUB_SHA::7}).
+
+          Download **Breviary.apk** below and open it on your Android phone. Android will ask you to allow installing apps from your browser or Files app the first time.
+
+          The app shows the live Breviary site, so most updates arrive automatically without a new download."
+          if gh release view android >/dev/null 2>&1; then
+            gh release edit android --title "Breviary for Android ${VERSION}" --notes "$NOTES"
+          else
+            gh release create android --title "Breviary for Android ${VERSION}" --notes "$NOTES" --target "$GITHUB_SHA"
+          fi
+          gh release upload android "$RUNNER_TEMP/Breviary.apk" --clobber
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Breviary-apk
+          path: ${{ runner.temp }}/Breviary.apk

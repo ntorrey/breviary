@@ -55,7 +55,12 @@ export function applyTheme(s = current) {
   // Match the phone's status bar to the page background.
   const meta = document.getElementById('themeColor');
   if (meta) meta.content = getComputedStyle(root).getPropertyValue('--bg').trim() || '#f7f3ea';
+  // Inside the Android app, colour the area behind the phone's status bar to match.
+  try { window.BreviaryAndroid?.setStatusBarColor(meta?.content || ''); } catch { /* not in the Android app */ }
 }
+
+/** True when running inside the Android app (APK) rather than a browser. */
+export const inAndroidApp = typeof navigator !== 'undefined' && /BreviaryAndroidApp/.test(navigator.userAgent);
 
 // Follow the phone switching between light and dark while in Auto mode.
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyTheme());

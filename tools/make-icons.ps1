@@ -1,4 +1,5 @@
-# Generates the PNG app icons (same design as icons/icon.svg) using .NET System.Drawing.
+# Generates the PNG app icons (same design as icons/icon.svg) using .NET System.Drawing:
+# the web app icons in icons/, and the Android launcher icons in android-app/.
 # Run from the project folder:  pwsh tools/make-icons.ps1
 Add-Type -AssemblyName System.Drawing
 
@@ -14,7 +15,9 @@ function RoundRect([System.Drawing.Graphics]$g, $brush, [float]$x, [float]$y, [f
   $g.FillPath($brush, $p)
 }
 
-function MakeIcon([int]$size, [string]$path, [bool]$maskable = $false, [bool]$square = $false) {
+# $shape: rounded | square | circle | none (transparent background)
+# $k: artwork scale (1 = as in icon.svg; smaller keeps it inside a mask's safe zone)
+function MakeIcon([int]$size, [string]$path, [string]$shape = 'rounded', [double]$k = 1.0) {
   $bmp = New-Object System.Drawing.Bitmap $size, $size
   $g = [System.Drawing.Graphics]::FromImage($bmp)
   $g.SmoothingMode = 'AntiAlias'
@@ -24,10 +27,11 @@ function MakeIcon([int]$size, [string]$path, [bool]$maskable = $false, [bool]$sq
   $cream = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#f7f3ea'))
   $gold = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#e2cc84'))
   $red = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#b3261e'))
-  $radius = if ($maskable -or $square) { 0 } else { 112 * $s }
-  RoundRect $g $burgundy 0 0 $size $size $radius
-  # Maskable icons keep artwork inside the central 80% safe zone.
-  $k = if ($maskable) { 0.78 } else { 1.0 }
+  switch ($shape) {
+    'rounded' { RoundRect $g $burgundy 0 0 $size $size (112 * $s) }
+    'square' { RoundRect $g $burgundy 0 0 $size $size 0 }
+    'circle' { $g.FillEllipse($burgundy, 0, 0, $size, $size) }
+  }
   $o = (512 - 512 * $k) / 2
   function T([float]$v) { return ($o + $v * $k) * $s }
   function L([float]$v) { return $v * $k * $s }
@@ -36,13 +40,28 @@ function MakeIcon([int]$size, [string]$path, [bool]$maskable = $false, [bool]$sq
   RoundRect $g $burgundy (T 252) (T 150) (L 28) (L 200) (L 6)
   RoundRect $g $burgundy (T 206) (T 200) (L 120) (L 28) (L 6)
   RoundRect $g $red (T 330) (T 380) (L 22) (L 80) 0
+  New-Item -ItemType Directory -Force (Split-Path $path) | Out-Null
   $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
   $g.Dispose(); $bmp.Dispose()
 }
 
+# Web app
 $dir = Join-Path $PSScriptRoot '..\icons'
 MakeIcon 192 (Join-Path $dir 'icon-192.png')
 MakeIcon 512 (Join-Path $dir 'icon-512.png')
-MakeIcon 512 (Join-Path $dir 'icon-maskable-512.png') $true
-MakeIcon 180 (Join-Path $dir 'apple-touch-icon.png') $false $true
+MakeIcon 512 (Join-Path $dir 'icon-maskable-512.png') 'square' 0.78
+MakeIcon 180 (Join-Path $dir 'apple-touch-icon.png') 'square'
+
+# Android launcher icons (legacy square, round, and adaptive foreground at 108dp)
+$res = Join-Path $PSScriptRoot '..\android-app\android\app\src\main\res'
+if (Test-Path $res) {
+  $densities = @{ 'mdpi' = 1.0; 'hdpi' = 1.5; 'xhdpi' = 2.0; 'xxhdpi' = 3.0; 'xxxhdpi' = 4.0 }
+  foreach ($d in $densities.Keys) {
+    $m = $densities[$d]
+    $folder = Join-Path $res "mipmap-$d"
+    MakeIcon ([int](48 * $m)) (Join-Path $folder 'ic_launcher.png') 'rounded'
+    MakeIcon ([int](48 * $m)) (Join-Path $folder 'ic_launcher_round.png') 'circle' 0.82
+    MakeIcon ([int](108 * $m)) (Join-Path $folder 'ic_launcher_foreground.png') 'none' 0.72
+  }
+}
 Write-Output 'Icons written.'

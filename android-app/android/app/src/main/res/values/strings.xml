@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Breviary</string>
+    <string name="title_activity_main">Breviary</string>
+    <string name="package_name">com.ntorrey.breviary</string>
+    <string name="custom_url_scheme">com.ntorrey.breviary</string>
+</resources>
