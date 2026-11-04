@@ -3,7 +3,8 @@
 A small native Android app, built with [Capacitor](https://capacitorjs.com), that shows the Breviary web app full-screen.
 
 - **It loads the live site** (`https://ntorrey.github.io/breviary/`). Every update to the web app reaches the Android app automatically, just like the installed web app. After the first launch, the service worker keeps it working offline.
-- **The system bars are drawn natively.** The bottom navigation bar is always black. The top status bar matches the theme chosen in the app (light, dark or black). See `MainActivity.java`.
+- **The system bars are drawn natively.** Both the top status bar and the bottom navigation bar take the app's background color for the chosen theme (light, dark or black), with readable icons. See `MainActivity.java`.
+- **Full-screen reading is truly full screen.** It hides Android's status and navigation bars, so the text fills the whole display. Tap anywhere to show the exit button, or swipe from the edge to see the bars briefly.
 - **Keep screen on while praying** works through a native call, because Android's built-in browser engine lacks the browser feature for it.
 
 ## Download

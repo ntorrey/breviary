@@ -228,7 +228,10 @@ async function renderHour(iso, hour, token) {
 // always shows a "drag from the top to exit full screen" message, which pages
 // cannot suppress. Opened from the home-screen icon, the app has no browser
 // bars anyway, so reading mode already shows only the text.
+// In the Android app (APK), reading mode also hides the phone's status and
+// navigation bars natively, so the text truly fills the screen.
 let focusMode = false;
+const setImmersive = (on) => { try { window.BreviaryAndroid?.setImmersive?.(on); } catch { /* not in the APK */ } };
 const focusExit = document.createElement('button');
 focusExit.type = 'button';
 focusExit.className = 'focus-exit';
@@ -242,15 +245,21 @@ let exitTimer;
 function showFocusExit() {
   focusExit.classList.add('visible');
   clearTimeout(exitTimer);
-  exitTimer = setTimeout(() => focusExit.classList.remove('visible'), 2500);
+  exitTimer = setTimeout(() => focusExit.classList.remove('visible'), 3500);
 }
 
 function setFocus(on) {
   focusMode = on;
   document.body.classList.toggle('focus', on);
+  setImmersive(on);
   if (on) showFocusExit();
   else focusExit.classList.remove('visible');
 }
+
+// Android may restore the bars when the app returns from the background.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && focusMode) setImmersive(true);
+});
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focusMode) setFocus(false); });
 
@@ -264,12 +273,9 @@ window.addEventListener('scroll', () => {
   else if (y > lastScrollY + 6) document.body.classList.add('bar-hidden');
   if (Math.abs(y - lastScrollY) > 6) lastScrollY = y;
 }, { passive: true });
-// In reading mode, a tap on the text briefly shows the exit button.
-main.addEventListener('click', (e) => {
-  if (focusMode && !e.target.closest('a, button, summary, select, input')) {
-    if (focusExit.classList.contains('visible')) focusExit.classList.remove('visible');
-    else showFocusExit();
-  }
+// In reading mode, a tap anywhere on the screen shows the exit button for a few seconds.
+document.addEventListener('click', (e) => {
+  if (focusMode && !e.target.closest('.focus-exit')) showFocusExit();
 });
 
 let wakeLock = null;

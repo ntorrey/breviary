@@ -50,7 +50,7 @@ Then on the phone:
 
 ### Android app (APK)
 
-There is also an installable Android app: [download Breviary.apk](https://github.com/ntorrey/breviary/releases/download/android/Breviary.apk). It wraps the live site, so web updates reach it automatically. Its bottom bar is always black, and its top bar follows the app's theme. See [android-app/README.md](android-app/README.md) for how it's built and signed.
+There is also an installable Android app: [download Breviary.apk](https://github.com/ntorrey/breviary/releases/download/android/Breviary.apk). It wraps the live site, so web updates reach it automatically. Both of its system bars match the app's background, and its full-screen reading mode hides them entirely. See [android-app/README.md](android-app/README.md) for how it's built and signed.
 
 ## Adding the text
 
