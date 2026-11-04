@@ -22,6 +22,10 @@
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --tabbar-h: 60px;
+  /* Space under the page for the phone's gesture / button bar. Browsers fill
+     this from env(); the Android app sets it directly, because the page is
+     drawn behind its transparent navigation bar. */
+  --bottom-inset: env(safe-area-inset-bottom, 0px);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -99,6 +103,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   background: var(--bg);
+  /* No bounce or stretch when scrolling past the top or bottom. */
+  overscroll-behavior: none;
   /* Scrollbar: thin and almost transparent, so it doesn't distract from the text. */
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--muted) 14%, transparent) transparent;
@@ -113,7 +119,8 @@ body {
   font-family: var(--sans);
   line-height: 1.45;
   min-height: 100dvh;
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  overscroll-behavior: none;
+  padding-bottom: calc(var(--tabbar-h) + var(--bottom-inset));
 }
 a { color: inherit; }
 button, select, input { font: inherit; color: inherit; }
@@ -147,8 +154,8 @@ main { max-width: 720px; margin: 0 auto; padding: 0 16px 32px; outline: none; }
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
   display: flex; justify-content: center;
-  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(var(--tabbar-h) + var(--bottom-inset));
+  padding-bottom: var(--bottom-inset);
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
@@ -159,7 +166,7 @@ main { max-width: 720px; margin: 0 auto; padding: 0 16px 32px; outline: none; }
 }
 .tabbar a[aria-current="page"] { color: var(--accent); }
 body.reading .tabbar { display: none; }
-body.reading { padding-bottom: env(safe-area-inset-bottom); }
+body.reading { padding-bottom: var(--bottom-inset); }
 
 /* ---------- Day view ---------- */
 .day-head {
@@ -335,7 +342,7 @@ body.focus .focus-exit { display: inline-flex; }
 body.focus .focus-exit.visible { opacity: .75; pointer-events: auto; }
 
 .toast {
-  position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
+  position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 16px + var(--bottom-inset));
   transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
   background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px;
   transition: opacity .2s, transform .2s; max-width: calc(100% - 32px);
