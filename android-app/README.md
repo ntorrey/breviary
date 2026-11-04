@@ -34,9 +34,16 @@ Android installs an update only if it's signed with the **same key** as the inst
 
 The workflow reads the key from three encrypted repository secrets. To upload them (once, or again if the key ever changes):
 
+On Windows (PowerShell), from the project folder:
+
 ```bash
-cd android-app
-bash upload-signing-secrets.sh
+pwsh android-app/upload-signing-secrets.ps1
+```
+
+On macOS or Linux (with the GitHub CLI installed there):
+
+```bash
+bash android-app/upload-signing-secrets.sh
 ```
 
 ## Working on it locally
