@@ -80,6 +80,8 @@ async function render() {
   const route = parseRoute();
   const token = ++renderToken;
   document.body.classList.toggle('reading', route.view === 'hour');
+  document.body.classList.remove('bar-hidden');
+  lastScrollY = 0;
   for (const a of document.querySelectorAll('.tabbar a')) {
     const tab = a.dataset.tab;
     const on = (tab === 'today' && route.view === 'day') || tab === route.view;
@@ -176,6 +178,11 @@ function fmtShort(iso) {
   const d = fromIso(iso);
   return `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}`;
 }
+/** 'MM-DD' -> 'March 17' */
+const monthDay = (md) => {
+  const [m, d] = String(md).split('-').map(Number);
+  return MONTH_NAMES[m - 1] ? `${MONTH_NAMES[m - 1]} ${d}` : md;
+};
 const capital = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // ---------------- Hour view ----------------
@@ -223,7 +230,9 @@ let focusMode = false;
 const focusExit = document.createElement('button');
 focusExit.type = 'button';
 focusExit.className = 'focus-exit';
-focusExit.innerHTML = `${ICON.collapse}<span>Exit full screen</span>`;
+focusExit.innerHTML = ICON.collapse;
+focusExit.setAttribute('aria-label', 'Exit full screen');
+focusExit.title = 'Exit full screen';
 focusExit.addEventListener('click', (e) => { e.stopPropagation(); setFocus(false); });
 document.body.appendChild(focusExit);
 let exitTimer;
@@ -242,6 +251,17 @@ function setFocus(on) {
 }
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focusMode) setFocus(false); });
+
+// While praying an Hour, the top bar slides away when scrolling down and
+// returns when scrolling up (or at the top of the page).
+let lastScrollY = 0;
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if (!document.body.classList.contains('reading')) return;
+  if (y < 40 || y < lastScrollY - 6) document.body.classList.remove('bar-hidden');
+  else if (y > lastScrollY + 6) document.body.classList.add('bar-hidden');
+  if (Math.abs(y - lastScrollY) > 6) lastScrollY = y;
+}, { passive: true });
 // In reading mode, a tap on the text briefly shows the exit button.
 main.addEventListener('click', (e) => {
   if (focusMode && !e.target.closest('a, button, summary, select, input')) {
@@ -330,12 +350,13 @@ function renderSettings() {
       <h2 class="section-title">Local celebrations</h2>
       <div class="card">
         <ul class="local-list">${s.localCelebrations.length ? s.localCelebrations.map((l, i) =>
-          `<li><span>${esc(l.date)} · ${esc(l.title)} <small>(${esc({ S: 'Solemnity', F: 'Feast', M: 'Memorial', OM: 'Optional Memorial' }[l.rank])})</small></span>
+          `<li><span>${esc(monthDay(l.date))} · ${esc(l.title)} <small>(${esc({ S: 'Solemnity', F: 'Feast', M: 'Memorial', OM: 'Optional Memorial' }[l.rank])})</small></span>
            <button class="btn" data-del="${i}">Remove</button></li>`).join('') : '<li><span style="color:var(--muted)">Add your diocesan patron, the anniversary of your church’s dedication, your religious order’s saints, and so on.</span></li>'}</ul>
         <form class="local-form" id="localForm">
           <input name="title" placeholder="Title (e.g. Saint Patrick, Principal Patron of the Diocese)" required>
+          <label class="field-label" for="localDate">Date <small>(only the month and day are kept; it repeats every year)</small></label>
           <div class="two">
-            <input name="date" type="text" placeholder="MM-DD" pattern="\\d\\d-\\d\\d" required>
+            <input id="localDate" name="date" type="date" value="${todayIso()}" required>
             <select name="rank"><option value="S">Solemnity</option><option value="F">Feast</option><option value="M" selected>Memorial</option><option value="OM">Optional Memorial</option></select>
           </div>
           <div class="two">
@@ -406,7 +427,9 @@ function renderSettings() {
     e.preventDefault();
     const f = new FormData(e.target);
     const entry = Object.fromEntries(f.entries());
-    if (!/^\d\d-\d\d$/.test(entry.date)) return toast('Date must look like 03-17');
+    // The date picker gives YYYY-MM-DD; a local celebration recurs, so keep MM-DD.
+    if (!/^\d{4}-\d\d-\d\d$/.test(entry.date)) return toast('Please choose a date');
+    entry.date = entry.date.slice(5);
     updateSettings({ localCelebrations: [...getSettings().localCelebrations, entry] });
     toast('Added');
     renderSettings();

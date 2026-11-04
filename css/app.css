@@ -95,7 +95,8 @@
 
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+/* The page background also fills any area the phone draws behind its own bars. */
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
 body {
   margin: 0;
   background: var(--bg);
@@ -287,7 +288,28 @@ select {
 .local-form { display: grid; gap: 8px; padding: 12px 0; }
 .local-form input, .local-form select { padding: 8px 10px; border-radius: 9px; border: 1px solid var(--border); background-color: var(--bg); width: 100%; }
 .local-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.local-form .field-label { font-size: 13px; color: var(--muted); margin-bottom: -4px; }
+.local-form .field-label small { font-size: 12px; }
+.local-form input[type="date"] { min-height: 38px; }
 .fine { color: var(--muted); font-size: 12px; margin: 6px 4px 18px; }
+
+/* ---------- Praying an Hour: keep the controls out of the way ---------- */
+body.reading .topbar {
+  border-bottom-color: transparent;
+  background: var(--bg);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  padding-top: calc(2px + env(safe-area-inset-top)); padding-bottom: 2px;
+  transition: transform .25s ease, opacity .25s ease;
+}
+body.reading .topbar .icon-btn { color: var(--muted); opacity: .6; width: 36px; height: 36px; }
+body.reading .topbar .icon-btn svg { width: 19px; height: 19px; }
+body.reading .topbar .title strong { font-size: 13px; font-weight: 500; color: var(--muted); }
+body.reading .topbar .title small { display: none; }
+/* Slides away while scrolling down through the text; returns when scrolling up. */
+body.reading.bar-hidden .topbar { transform: translateY(-100%); opacity: 0; }
+html:has(body.reading) { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 35%, transparent) transparent; }
+body.reading ::-webkit-scrollbar { width: 4px; }
+body.reading ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--muted) 35%, transparent); border-radius: 4px; }
 
 /* ---------- Full-screen reading mode ---------- */
 body.focus .topbar, body.focus .tabbar { display: none; }
@@ -296,15 +318,14 @@ body.focus main { padding-top: calc(12px + env(safe-area-inset-top)); }
 .focus-exit {
   position: fixed; z-index: 30;
   top: calc(10px + env(safe-area-inset-top)); right: 12px;
-  display: none; align-items: center; gap: 6px;
-  padding: 8px 14px 8px 10px; border: 1px solid var(--border); border-radius: 999px;
-  background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer;
-  box-shadow: 0 4px 16px rgb(0 0 0 / .15);
-  opacity: 0; pointer-events: none; transition: opacity .25s;
+  display: none; align-items: center; justify-content: center;
+  width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent); color: var(--muted); cursor: pointer;
+  opacity: 0; pointer-events: none; transition: opacity .3s;
 }
-.focus-exit svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.focus-exit svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 body.focus .focus-exit { display: inline-flex; }
-body.focus .focus-exit.visible { opacity: 1; pointer-events: auto; }
+body.focus .focus-exit.visible { opacity: .75; pointer-events: auto; }
 
 .toast {
   position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
