@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Breviary</title>
   <meta name="description" content="The Liturgy of the Hours">
-  <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" id="themeColor" content="#f7f3ea">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,13 +13,15 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/app.css">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try {
       const s = JSON.parse(localStorage.getItem('breviary.settings') || '{}');
-      if (s.theme === 'light' || s.theme === 'dark') document.documentElement.dataset.theme = s.theme;
+      if (['light', 'dark', 'black'].includes(s.theme)) document.documentElement.dataset.theme = s.theme;
       if (s.textSize) document.documentElement.style.setProperty('--text-size', s.textSize + 'px');
+      if (s.font) document.documentElement.dataset.font = s.font;
     } catch {}
   </script>
 </head>
@@ -30,7 +31,7 @@
   <nav class="tabbar" aria-label="Main">
     <a href="#/" data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M6 9h12"/></svg><span>Today</span></a>
     <a href="#/calendar" data-tab="calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Calendar</span></a>
-    <a href="#/settings" data-tab="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg><span>Settings</span></a>
+    <a href="#/settings" data-tab="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Settings</span></a>
   </nav>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script type="module" src="js/app.js"></script>

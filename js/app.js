@@ -49,6 +49,15 @@ const ICON = {
   collapse: '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
 };
 
+const FONTS = [
+  ['classic', 'Classic (Palatino)'],
+  ['literata', 'Literata'],
+  ['garamond', 'EB Garamond'],
+  ['sourceserif', 'Source Serif'],
+  ['atkinson', 'Atkinson Hyperlegible'],
+  ['sans', 'System sans-serif'],
+];
+
 const SEASON_NAMES = { advent: 'Advent', christmas: 'Christmas Time', ordinary: 'Ordinary Time', lent: 'Lent', triduum: 'Paschal Triduum', easter: 'Easter Time' };
 const ROMAN = ['', 'I', 'II', 'III', 'IV'];
 const shiftIso = (iso, n) => toIso(addDays(fromIso(iso), n));
@@ -182,9 +191,6 @@ async function renderHour(iso, hour, token) {
   const office = await assembleHour(iso, hour, { ...calendarSettings(s), showSources: s.showSources, invitatoryPsalm: s.invitatoryPsalm }, store);
   if (token !== renderToken) return;
 
-  const idx = HOURS.findIndex((h) => h.id === hour);
-  const prev = idx > 0 ? { iso, h: HOURS[idx - 1] } : { iso: shiftIso(iso, -1), h: HOURS[HOURS.length - 1] };
-  const next = idx < HOURS.length - 1 ? { iso, h: HOURS[idx + 1] } : { iso: shiftIso(iso, 1), h: HOURS[0] };
   setTopbar({
     left: `<a class="icon-btn" href="#/day/${iso}" aria-label="Back to the day">${ICON.back}</a>`,
     title: office.title,
@@ -201,10 +207,6 @@ async function renderHour(iso, hour, token) {
       </header>
       ${missing && s.showSources ? `<p class="rubric block missing-note" style="font-family:var(--sans);font-size:13px;text-align:center">${missing === 1 ? '1 part of this Hour is' : `${missing} parts of this Hour are`} not yet loaded in this translation. Tap one to see where the app looked.</p>` : ''}
       ${blocksToHtml(s.showSources ? office.blocks : office.blocks.filter((b) => b.k !== 'missing'))}
-      <nav class="office-nav">
-        <a href="#/hour/${prev.iso}/${prev.h.id}"><small>Previous</small>${esc(prev.h.name)}</a>
-        <a href="#/hour/${next.iso}/${next.h.id}"><small>Next</small>${esc(next.h.name)}</a>
-      </nav>
     </article>`;
   window.scrollTo(0, 0);
   if (s.keepAwake) requestWakeLock();
@@ -212,11 +214,12 @@ async function renderHour(iso, hour, token) {
 }
 
 // ---------------- Full-screen reading mode ----------------
-// Hides the bars and every editing aid so only the text remains. Where the
-// browser allows it (Android, desktop) it also goes truly full screen; on an
-// iPhone the installed app already has no browser bars.
+// Hides the app's bars and every editing aid so only the text remains.
+// It deliberately does NOT call the browser's Fullscreen API: on Android that
+// always shows a "drag from the top to exit full screen" message, which pages
+// cannot suppress. Opened from the home-screen icon, the app has no browser
+// bars anyway, so reading mode already shows only the text.
 let focusMode = false;
-let nativeFullscreen = false;
 const focusExit = document.createElement('button');
 focusExit.type = 'button';
 focusExit.className = 'focus-exit';
@@ -234,21 +237,10 @@ function showFocusExit() {
 function setFocus(on) {
   focusMode = on;
   document.body.classList.toggle('focus', on);
-  if (on) {
-    showFocusExit();
-    const req = document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
-    req?.then(() => { nativeFullscreen = true; }).catch(() => {});
-  } else {
-    focusExit.classList.remove('visible');
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    nativeFullscreen = false;
-  }
+  if (on) showFocusExit();
+  else focusExit.classList.remove('visible');
 }
 
-// Leaving the browser's full screen (back gesture, Esc) also leaves reading mode.
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement && nativeFullscreen && focusMode) setFocus(false);
-});
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focusMode) setFocus(false); });
 // In reading mode, a tap on the text briefly shows the exit button.
 main.addEventListener('click', (e) => {
@@ -313,9 +305,12 @@ function renderSettings() {
       <h1>Settings</h1>
       <h2 class="section-title">Appearance</h2>
       <div class="card">
-        <div class="row"><span class="lbl">Theme</span>${seg('theme', s.theme, [['system', 'Auto'], ['light', 'Light'], ['dark', 'Dark']])}</div>
+        <div class="row"><span class="lbl">Theme</span>${seg('theme', s.theme, [['system', 'Auto'], ['light', 'Light'], ['dark', 'Dark'], ['black', 'Black']])}</div>
+        <div class="row"><label for="font">Font</label>
+          <select id="font">${FONTS.map(([v, l]) => `<option value="${v}" ${v === s.font ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
         <div class="row"><label for="textSize">Text size<small id="textSizeVal">${s.textSize}px</small></label>
-          <input id="textSize" type="range" min="14" max="30" step="1" value="${s.textSize}"></div>
+          <input id="textSize" type="range" min="14" max="34" step="1" value="${s.textSize}"></div>
+        <p class="font-preview"><span class="mark">Ant.</span> O God, come to my assistance. O Lord, make haste to help me.</p>
         <div class="row"><label for="keepAwake">Keep screen on while praying<small>Where the browser supports it</small></label>
           <input id="keepAwake" type="checkbox" ${s.keepAwake ? 'checked' : ''}></div>
         <div class="row"><label for="focusOnOpen">Open Hours full screen<small>Show only the text. Tap the text to find the exit button. You can also use the full-screen button at the top of any Hour.</small></label>
@@ -362,6 +357,10 @@ function renderSettings() {
         <div class="row"><span class="lbl">Optional memorial choices<small>${Object.keys(s.choices).length} saved</small></span>
           <button class="btn" id="clearChoices">Clear</button></div>
       </div>
+      <h2 class="section-title">About</h2>
+      <div class="card">
+        <div class="row"><span class="lbl">App version<small id="appBuilt"></small></span><strong id="appVersion">…</strong></div>
+      </div>
       <p class="fine">Settings are stored on this device only. The liturgical calendar is computed on the device and works offline.</p>
     </div>`;
 
@@ -375,6 +374,7 @@ function renderSettings() {
     document.getElementById('textSizeVal').textContent = `${ts.value}px`;
   });
   const bind = (id, fn, ev = 'change') => document.getElementById(id).addEventListener(ev, fn);
+  bind('font', (e) => updateSettings({ font: e.target.value }));
   bind('keepAwake', (e) => updateSettings({ keepAwake: e.target.checked }));
   bind('focusOnOpen', (e) => updateSettings({ focusOnOpen: e.target.checked }));
   bind('edition', async (e) => {
@@ -412,6 +412,27 @@ function renderSettings() {
     renderSettings();
   }, 'submit');
   showContentInfo();
+  showVersion();
+}
+
+// version.json is written by the deploy workflow; it is absent when running locally.
+async function showVersion() {
+  let v = null;
+  try {
+    const r = await fetch('version.json', { cache: 'no-store' });
+    if (r.ok) v = await r.json();
+  } catch { /* offline with nothing cached */ }
+  const vEl = document.getElementById('appVersion');
+  const bEl = document.getElementById('appBuilt');
+  if (!vEl) return;
+  if (!v) {
+    vEl.textContent = 'Development';
+    bEl.textContent = 'Not a deployed build';
+    return;
+  }
+  vEl.textContent = v.version;
+  const built = new Date(v.built);
+  bEl.textContent = `Updated ${built.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}, ${built.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${v.commit}`;
 }
 
 async function fillEditionSelect() {
@@ -451,5 +472,23 @@ window.addEventListener('hashchange', render);
 render();
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  navigator.serviceWorker.register('sw.js').catch((e) => console.warn('Service worker not registered', e));
+  // When a new version has been deployed, the new service worker takes over and
+  // the page reloads to show it, unless someone is in the middle of an Hour;
+  // then the reload waits until they leave it.
+  const hadController = !!navigator.serviceWorker.controller;
+  let updatePending = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return; // first install, nothing to update
+    if (parseRoute().view === 'hour') {
+      updatePending = true;
+      toast('An update is ready. It will apply when you leave this Hour.');
+    } else location.reload();
+  });
+  window.addEventListener('hashchange', () => {
+    if (updatePending && parseRoute().view !== 'hour') location.reload();
+  });
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    // Check for updates whenever the app comes back to the foreground.
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+  }).catch((e) => console.warn('Service worker not registered', e));
 }

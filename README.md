@@ -83,7 +83,7 @@ The structure is the same for every translation, so switching changes the words 
 
 ### Full-screen reading
 
-The button at the top right of any Hour hides everything but the text. On Android and desktop it also enters true full screen. Tap the text to show the exit button, or press Esc. Settings → **Open Hours full screen** makes this the default.
+The button at the top right of any Hour hides everything but the text. Tap the text to show the exit button, or press Esc. It doesn't use the browser's own full-screen mode, because on Android that always shows a "drag from the top to exit" message. Opened from the home-screen icon, the app has no browser bars, so only the text shows. Settings → **Open Hours full screen** makes this the default.
 
 ## Project layout
 

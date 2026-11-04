@@ -2,8 +2,9 @@
 const KEY = 'breviary.settings';
 
 export const DEFAULTS = {
-  theme: 'system',          // system | light | dark
+  theme: 'system',          // system | light | dark | black
   textSize: 19,             // px
+  font: 'classic',          // classic | literata | garamond | sourceserif | atkinson | sans
   region: 'usa',            // usa | general
   ascensionSunday: null,    // null = regional default
   invitatoryPsalm: '95',    // 95 | 100 | 67 | 24
@@ -46,7 +47,15 @@ export function calendarSettings(s = current) {
 
 export function applyTheme(s = current) {
   const root = document.documentElement;
-  if (s.theme === 'light' || s.theme === 'dark') root.dataset.theme = s.theme;
+  if (['light', 'dark', 'black'].includes(s.theme)) root.dataset.theme = s.theme;
   else delete root.dataset.theme;
   root.style.setProperty('--text-size', `${s.textSize}px`);
+  if (s.font && s.font !== 'classic') root.dataset.font = s.font;
+  else delete root.dataset.font;
+  // Match the phone's status bar to the page background.
+  const meta = document.getElementById('themeColor');
+  if (meta) meta.content = getComputedStyle(root).getPropertyValue('--bg').trim() || '#f7f3ea';
 }
+
+// Follow the phone switching between light and dark while in Auto mode.
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyTheme());

@@ -64,6 +64,35 @@
   --lit-black: #aaa;
 }
 
+/* True black: for OLED phones and praying in the dark. */
+:root[data-theme="black"] {
+  color-scheme: dark;
+  --bg: #000;
+  --surface: #0c0c0c;
+  --surface-2: #1a1a1a;
+  --text: #e6e0d6;
+  --muted: #958b7e;
+  --border: #262626;
+  --rubric: #e8776b;
+  --accent: #e9a59c;
+  --missing-bg: #15110a;
+  --missing-border: #4d3d1d;
+  --lit-violet: #a782d6;
+  --lit-white: #e2cc84;
+  --lit-red: #ec6d62;
+  --lit-green: #6fbf79;
+  --lit-rose: #eb9bbd;
+  --lit-black: #aaa;
+}
+:root[data-theme="black"] .topbar { background: #000; backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* ---------- Reading font (Settings → Font) ---------- */
+:root[data-font="literata"] { --serif: 'R-literata', Georgia, serif; }
+:root[data-font="garamond"] { --serif: 'R-garamond', Garamond, Georgia, serif; --font-scale: 1.1; }
+:root[data-font="sourceserif"] { --serif: 'R-sourceserif', Georgia, serif; }
+:root[data-font="atkinson"] { --serif: 'R-atkinson', var(--sans); --font-scale: .96; }
+:root[data-font="sans"] { --serif: var(--sans); --font-scale: .96; }
+
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -149,7 +178,7 @@ body.reading { padding-bottom: env(safe-area-inset-bottom); }
 .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
 .choice { margin-top: 14px; }
 .choice label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-.choice select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); }
+.choice select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background-color: var(--bg); }
 
 .hours { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .hours a {
@@ -165,7 +194,9 @@ body.reading { padding-bottom: env(safe-area-inset-bottom); }
 .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 22px 4px 8px; }
 
 /* ---------- Office text ---------- */
-.office { font-family: var(--serif); font-size: var(--text-size); line-height: 1.55; padding-top: 8px; }
+.office, .font-preview { font-family: var(--serif); font-size: calc(var(--text-size) * var(--font-scale, 1)); line-height: 1.55; padding-top: 8px; }
+.font-preview { margin: 0; padding: 4px 0 14px; border-bottom: 1px solid var(--border); }
+.font-preview .mark { color: var(--rubric); }
 .office-head { text-align: center; margin: 18px 0 8px; }
 .office-head h1 { font-size: 1.35em; margin: 0; color: var(--rubric); font-weight: 600; }
 .office-head p { margin: 4px 0 0; color: var(--muted); font-size: .8em; }
@@ -198,13 +229,7 @@ body.reading { padding-bottom: env(safe-area-inset-bottom); }
 .office .missing-label { color: var(--text); font-weight: 600; }
 .office .missing ol { margin: 6px 0 4px; padding-left: 22px; }
 .office .missing code { font-size: 12px; word-break: break-all; }
-.office-nav { display: flex; justify-content: space-between; gap: 8px; margin: 32px 0 8px; font-family: var(--sans); }
-.office-nav a {
-  flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
-  background: var(--surface); text-decoration: none; font-size: 14px;
-}
-.office-nav a:last-child { text-align: right; }
-.office-nav small { display: block; color: var(--muted); font-size: 11px; }
+.office { padding-bottom: 48px; }
 
 /* ---------- Calendar ---------- */
 .month-nav { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 8px; }
@@ -231,12 +256,25 @@ body.reading { padding-bottom: env(safe-area-inset-bottom); }
 .row label, .row .lbl { flex: 1; }
 .row small { display: block; color: var(--muted); font-size: 12px; }
 .row select, .row input[type="text"], .row input[type="date"] {
-  padding: 8px 10px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg); max-width: 55%;
+  padding: 8px 10px; border-radius: 9px; border: 1px solid var(--border); background-color: var(--bg); max-width: 55%;
+}
+/* Dropdowns: our own caret, with room on the right, in the theme's colours. */
+select {
+  -webkit-appearance: none; appearance: none;
+  padding-right: 34px !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 52%, calc(100% - 13px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+  cursor: pointer;
 }
 .row input[type="range"] { width: 140px; accent-color: var(--accent); }
 .row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); }
 .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-.seg button { border: 0; background: transparent; padding: 7px 12px; cursor: pointer; font-size: 14px; }
+.seg button { border: 0; background: transparent; padding: 7px 10px; cursor: pointer; font-size: 14px; }
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
 .btn {
   border: 1px solid var(--border); background: var(--surface-2); border-radius: 10px;
@@ -247,7 +285,7 @@ body.reading { padding-bottom: env(safe-area-inset-bottom); }
 .local-list li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
 .local-list li span { flex: 1; }
 .local-form { display: grid; gap: 8px; padding: 12px 0; }
-.local-form input, .local-form select { padding: 8px 10px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg); width: 100%; }
+.local-form input, .local-form select { padding: 8px 10px; border-radius: 9px; border: 1px solid var(--border); background-color: var(--bg); width: 100%; }
 .local-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .fine { color: var(--muted); font-size: 12px; margin: 6px 4px 18px; }
 
@@ -255,7 +293,6 @@ body.reading { padding-bottom: env(safe-area-inset-bottom); }
 body.focus .topbar, body.focus .tabbar { display: none; }
 body.focus .missing, body.focus .src, body.focus .missing-note { display: none; }
 body.focus main { padding-top: calc(12px + env(safe-area-inset-top)); }
-body.focus .office-nav { opacity: .55; }
 .focus-exit {
   position: fixed; z-index: 30;
   top: calc(10px + env(safe-area-inset-top)); right: 12px;

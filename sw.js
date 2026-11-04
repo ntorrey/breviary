@@ -3,15 +3,21 @@
 // - content/editions.json and each content/<edition>/index.json: network first,
 //   so new text releases are noticed.
 // - content shards: cache first (their URLs carry ?v=<version>, so new versions get new URLs).
-// Bump SHELL_VERSION when you change the list of app files.
+// - version.json: network first (shown in Settings).
+// - fonts/: cache first, in their own cache that survives app updates.
+// The deploy workflow (.github/workflows/deploy.yml) rewrites SHELL_VERSION on
+// every deploy, which makes phones install the new service worker and replace
+// all cached app files.
 
-const SHELL_VERSION = 'shell-v2';
+const SHELL_VERSION = 'shell-dev';
 const CONTENT_CACHE = 'content-v1';
+const FONT_CACHE = 'fonts-v1';
 const SHELL = [
   './',
   'index.html',
   'manifest.webmanifest',
   'css/app.css',
+  'css/fonts.css',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -28,13 +34,16 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(SHELL_VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' bypasses the browser's HTTP cache so we store the files just deployed.
+  event.waitUntil(caches.open(SHELL_VERSION)
+    .then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     for (const key of await caches.keys()) {
-      if (key !== SHELL_VERSION && key !== CONTENT_CACHE) await caches.delete(key);
+      if (![SHELL_VERSION, CONTENT_CACHE, FONT_CACHE].includes(key)) await caches.delete(key);
     }
     await self.clients.claim();
   })());
@@ -45,7 +54,11 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  if (url.pathname.includes('/content/') && /\/(index|editions)\.json$/.test(url.pathname)) {
+  if (url.pathname.endsWith('/version.json')) {
+    event.respondWith(networkFirst(req, SHELL_VERSION));
+  } else if (url.pathname.includes('/fonts/')) {
+    event.respondWith(cacheFirst(req, FONT_CACHE));
+  } else if (url.pathname.includes('/content/') && /\/(index|editions)\.json$/.test(url.pathname)) {
     event.respondWith(networkFirst(req, CONTENT_CACHE));
   } else if (url.pathname.includes('/content/')) {
     event.respondWith(cacheFirst(req, CONTENT_CACHE));
