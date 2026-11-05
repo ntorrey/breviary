@@ -26,7 +26,7 @@ const editionsReady = fetch('content/editions.json')
 function activeEdition() {
   const ready = editions.filter((e) => e.entries > 0);
   const want = getSettings().edition;
-  return ready.find((e) => e.id === want) || ready.find((e) => e.default) || ready[0] || editions[0] || { id: 'interim', name: 'Placeholder texts' };
+  return ready.find((e) => e.id === want) || ready.find((e) => e.default) || ready[0] || editions[0] || { id: 'english-pd', name: 'English (public domain)' };
 }
 
 function openStore() {
@@ -146,7 +146,7 @@ function renderDay(iso) {
     np: evening.kind === 'ep1' ? 'After Evening Prayer I' : '',
   };
 
-  main.innerHTML = `
+  main.innerHTML = `${apkUpdateBanner()}
     <section class="day-head lit-${cel.color}">
       <p class="meta">${esc(weekLine)} · Psalter Week ${ROMAN[day.psalterWeek]}</p>
       <h1>${esc(cel.title)}</h1>
@@ -169,6 +169,7 @@ function renderDay(iso) {
     </ul>
     ${isToday ? '' : `<p class="fine" style="text-align:center;margin-top:20px"><a href="#/">Go to today</a></p>`}`;
 
+  bindApkBanner();
   const sel = document.getElementById('celebrate');
   if (sel) sel.addEventListener('change', () => {
     updateSettings({ choices: { ...getSettings().choices, [iso]: sel.value } });
@@ -206,7 +207,10 @@ async function renderHour(iso, hour, token) {
     sub: longDate(iso),
     right: `<button class="icon-btn" id="focusBtn" type="button" aria-label="Full-screen reading" title="Full-screen reading">${ICON.expand}</button>`,
   });
-  document.getElementById('focusBtn').addEventListener('click', () => setFocus(true));
+  document.getElementById('focusBtn').addEventListener('click', (e) => {
+    e.stopPropagation(); // this tap enters full screen; it shouldn't also count as "show the exit button"
+    setFocus(true);
+  });
   const missing = office.blocks.filter((b) => b.k === 'missing').length;
   main.innerHTML = `
     <article class="office lit-${office.ctx.cel.color}">
@@ -220,6 +224,70 @@ async function renderHour(iso, hour, token) {
   window.scrollTo(0, 0);
   if (s.keepAwake) requestWakeLock();
   if (s.focusOnOpen && !focusMode) setFocus(true);
+}
+
+// ---------------- Android app: "update available" notice ----------------
+// Web updates reach the Android app by themselves. A new APK is only worth
+// installing when the Android frame gained something native. That is tracked
+// by a "native level" (android-app/native-release.json): each APK knows its
+// own, and the GitHub release notes carry the latest. The notice appears only
+// when the latest is higher than the installed app's.
+const APK_RELEASE_API = 'https://api.github.com/repos/ntorrey/breviary/releases/tags/android';
+let apkUpdate = null; // { level, notes } when a reinstall would add features
+
+function installedNativeLevel() {
+  try { return Number(window.BreviaryAndroid?.getNativeLevel?.()) || 1; } catch { return 1; }
+}
+
+async function checkApkUpdate() {
+  if (!inAndroidApp) return;
+  let latest = null;
+  try {
+    const cached = JSON.parse(localStorage.getItem('breviary.apkRelease') || 'null');
+    if (cached && Date.now() - cached.at < 6 * 3600 * 1000) latest = cached;
+  } catch { /* storage unavailable */ }
+  if (!latest) {
+    try {
+      const r = await fetch(APK_RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } });
+      if (!r.ok) return;
+      const body = (await r.json()).body || '';
+      latest = {
+        level: Number((body.match(/native-level:\s*(\d+)/) || [])[1]) || 1,
+        notes: ((body.match(/native-notes:\s*([\s\S]*?)\s*-->/) || [])[1] || '').trim(),
+        at: Date.now(),
+      };
+      try { localStorage.setItem('breviary.apkRelease', JSON.stringify(latest)); } catch { /* ignore */ }
+    } catch { return; } // offline
+  }
+  if (latest.level > installedNativeLevel() && getSettings().apkDismissedLevel !== latest.level) {
+    apkUpdate = latest;
+    const route = parseRoute();
+    if (route.view === 'day') renderDay(route.iso);
+  }
+}
+
+function androidAppVersion() {
+  try { return window.BreviaryAndroid?.getAppVersion?.() || ''; } catch { return ''; }
+}
+
+function apkUpdateBanner() {
+  if (!apkUpdate) return '';
+  return `<section class="update-banner" role="status">
+    <strong>New Android app version</strong>
+    <p>${esc(apkUpdate.notes || 'This version adds features that need a new download.')}</p>
+    <div class="update-actions">
+      <a class="btn primary" href="${APK_URL}" rel="noopener">Download</a>
+      <button class="btn" type="button" id="apkLater">Not now</button>
+    </div>
+  </section>`;
+}
+
+function bindApkBanner() {
+  document.getElementById('apkLater')?.addEventListener('click', () => {
+    updateSettings({ apkDismissedLevel: apkUpdate.level });
+    apkUpdate = null;
+    document.querySelector('.update-banner')?.remove();
+  });
 }
 
 // ---------------- Full-screen reading mode ----------------
@@ -252,8 +320,9 @@ function setFocus(on) {
   focusMode = on;
   document.body.classList.toggle('focus', on);
   setImmersive(on);
-  if (on) showFocusExit();
-  else focusExit.classList.remove('visible');
+  // The exit button stays hidden until the reader taps the screen.
+  clearTimeout(exitTimer);
+  focusExit.classList.remove('visible');
 }
 
 // Android may restore the bars when the app returns from the background.
@@ -394,8 +463,11 @@ function renderSettings() {
       <h2 class="section-title">About</h2>
       <div class="card">
         <div class="row"><span class="lbl">App version<small id="appBuilt"></small></span><strong id="appVersion">…</strong></div>
-        ${inAndroidApp ? '' : `<div class="row"><span class="lbl">Android app<small>Download the APK and open it on an Android phone to install.</small></span>
-          <a class="btn" href="${APK_URL}" rel="noopener">Download</a></div>`}
+        ${inAndroidApp
+          ? `<div class="row"><span class="lbl">Android app<small>${apkUpdate ? esc(`Update available: ${apkUpdate.notes || 'new features need a new download'}`) : 'Up to date. Web updates arrive automatically.'}</small></span>
+             ${apkUpdate ? `<a class="btn primary" href="${APK_URL}" rel="noopener">Download</a>` : `<strong>${esc(androidAppVersion())}</strong>`}</div>`
+          : `<div class="row"><span class="lbl">Android app<small>Download the APK and open it on an Android phone to install.</small></span>
+             <a class="btn" href="${APK_URL}" rel="noopener">Download</a></div>`}
       </div>
       <p class="fine">Settings are stored on this device only. The liturgical calendar is computed on the device and works offline.</p>
     </div>`;
@@ -508,6 +580,7 @@ onSettingsChange((s) => applyTheme(s));
 applyTheme();
 window.addEventListener('hashchange', render);
 render();
+checkApkUpdate();
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   // When a new version has been deployed, the new service worker takes over and

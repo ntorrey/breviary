@@ -1,0 +1,138 @@
+%% English (public domain): the Ordinary.
+%% Traditional English texts in the public domain: Douay-Rheims verses for the
+%% opening versicles, the traditional Lord's Prayer and Glory Be, the Te Deum in
+%% the 1662 Book of Common Prayer translation, and traditional prose renderings
+%% of the Marian antiphons.
+
+=== ordinary
+--- intro_inv
+V/ O Lord, thou wilt open my lips.
+R/ And my mouth shall declare thy praise.
+
+--- intro
+V/ O God, come to my assistance.
+R/ O Lord, make haste to help me.
+Glory be to the Father, and to the Son, and to the Holy Spirit.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
+Alleluia.
+
+--- intro@lent
+V/ O God, come to my assistance.
+R/ O Lord, make haste to help me.
+Glory be to the Father, and to the Son, and to the Holy Spirit.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
+
+--- intro@triduum
+V/ O God, come to my assistance.
+R/ O Lord, make haste to help me.
+Glory be to the Father, and to the Son, and to the Holy Spirit.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
+
+--- gloria
+Glory be to the Father, and to the Son, *
+  and to the Holy Spirit.
+As it was in the beginning, is now, *
+  and ever shall be, world without end. Amen.
+
+--- our_father
+Our Father, who art in heaven, hallowed be thy name;
+thy kingdom come; thy will be done on earth as it is in heaven.
+Give us this day our daily bread;
+and forgive us our trespasses, as we forgive those who trespass against us;
+and lead us not into temptation, but deliver us from evil.
+
+--- dismissal
+! When a priest or deacon presides, he dismisses the people with a blessing. Otherwise:
+May the Lord bless us, and defend us from all evil, and bring us to life everlasting.
+R/ Amen.
+
+--- conclusion
+V/ Let us bless the Lord.
+R/ Thanks be to God.
+
+--- examen
+! A brief examination of conscience may be made here. In a common celebration, a penitential act may follow.
+
+--- blessing
+May the almighty Lord grant us a quiet night and a perfect end.
+R/ Amen.
+
+--- te_deum
+We praise thee, O God: *
+  we acknowledge thee to be the Lord.
+All the earth doth worship thee, *
+  the Father everlasting.
+To thee all Angels cry aloud, *
+  the Heavens, and all the Powers therein.
+To thee Cherubin and Seraphin *
+  continually do cry,
+Holy, Holy, Holy, *
+  Lord God of Sabaoth;
+Heaven and earth are full of the Majesty *
+  of thy glory.
+The glorious company of the Apostles *
+  praise thee.
+The goodly fellowship of the Prophets *
+  praise thee.
+The noble army of Martyrs *
+  praise thee.
+The holy Church throughout all the world *
+  doth acknowledge thee;
+The Father *
+  of an infinite Majesty;
+Thine honourable, true, *
+  and only Son;
+Also the Holy Ghost, *
+  the Comforter.
+Thou art the King of Glory, *
+  O Christ.
+Thou art the everlasting Son *
+  of the Father.
+When thou tookest upon thee to deliver man, *
+  thou didst not abhor the Virgin's womb.
+When thou hadst overcome the sharpness of death, *
+  thou didst open the Kingdom of Heaven to all believers.
+Thou sittest at the right hand of God, *
+  in the glory of the Father.
+We believe that thou shalt come *
+  to be our Judge.
+We therefore pray thee, help thy servants, *
+  whom thou hast redeemed with thy precious blood.
+Make them to be numbered with thy Saints, *
+  in glory everlasting.
+O Lord, save thy people, *
+  and bless thine heritage.
+Govern them, *
+  and lift them up for ever.
+Day by day *
+  we magnify thee;
+And we worship thy Name, *
+  ever world without end.
+Vouchsafe, O Lord, *
+  to keep us this day without sin.
+O Lord, have mercy upon us, *
+  have mercy upon us.
+O Lord, let thy mercy lighten upon us, *
+  as our trust is in thee.
+O Lord, in thee have I trusted: *
+  let me never be confounded.
+
+--- marian@advent
+Loving Mother of our Saviour, who art the ever-open gate of heaven and star of the sea, help thy fallen people who strive to rise again; thou who, to the wonder of nature, didst bring forth thy holy Creator, Virgin before and after, receiving that Ave from the mouth of Gabriel, have mercy on sinners.
+
+--- marian@lent
+Hail, O Queen of heaven; hail, O Lady of the angels; hail, thou root, hail, thou gate, from whom unto the world a light has arisen. Rejoice, O glorious Virgin, lovely beyond all others; farewell, most beautiful maiden, and pray for us to Christ.
+
+--- marian@easter
+Queen of heaven, rejoice, alleluia.
+For he whom thou didst merit to bear, alleluia,
+has risen, as he said, alleluia.
+Pray for us to God, alleluia.
+
+--- marian@ordinary
+Hail, holy Queen, Mother of mercy, our life, our sweetness and our hope.
+To thee do we cry, poor banished children of Eve;
+to thee do we send up our sighs, mourning and weeping in this vale of tears.
+Turn then, most gracious advocate, thine eyes of mercy toward us;
+and after this our exile, show unto us the blessed fruit of thy womb, Jesus.
+O clement, O loving, O sweet Virgin Mary.

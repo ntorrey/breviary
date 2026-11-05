@@ -1,7 +1,7 @@
 %% =====================================================================
-%% SAMPLE ENTRY: shows every kind of field for one Hour, so you can see
-%% how a fully loaded office looks in the app. Delete this folder once
-%% real text is imported (or replace the bracketed text with real text).
+%% EXAMPLE: every kind of field for one Hour (Morning Prayer, Sunday of
+%% Week I), in the content source format. Not built into the app. Copy it
+%% into an edition folder under content-src/ to see how a full Hour looks.
 %% =====================================================================
 
 === psalter/w1/sun/inv

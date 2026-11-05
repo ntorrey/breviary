@@ -1,0 +1,11 @@
+{
+  "edition": "latin",
+  "version": "9b68bbb5045c",
+  "built": "2026-11-05T14:28:29.237Z",
+  "shards": {
+    "canticles": "canticles.json",
+    "night": "night.json",
+    "ordinary": "ordinary.json",
+    "psalms": "psalms.json"
+  }
+}

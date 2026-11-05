@@ -1,0 +1,151 @@
+%% Latina (public domain): the Ordinary. Ancient Latin texts, in the public domain.
+%% Rubrics (lines starting with "!") stay in English, as instructions for the reader.
+
+=== ordinary
+--- intro_inv
+V/ Domine, labia mea aperies.
+R/ Et os meum annuntiabit laudem tuam.
+
+--- intro
+V/ Deus, in adiutorium meum intende.
+R/ Domine, ad adiuvandum me festina.
+Gloria Patri, et Filio, et Spiritui Sancto.
+Sicut erat in principio, et nunc et semper, et in saecula saeculorum. Amen.
+Alleluia.
+
+--- intro@lent
+V/ Deus, in adiutorium meum intende.
+R/ Domine, ad adiuvandum me festina.
+Gloria Patri, et Filio, et Spiritui Sancto.
+Sicut erat in principio, et nunc et semper, et in saecula saeculorum. Amen.
+
+--- intro@triduum
+V/ Deus, in adiutorium meum intende.
+R/ Domine, ad adiuvandum me festina.
+Gloria Patri, et Filio, et Spiritui Sancto.
+Sicut erat in principio, et nunc et semper, et in saecula saeculorum. Amen.
+
+--- gloria
+Gloria Patri, et Filio, *
+  et Spiritui Sancto.
+Sicut erat in principio, et nunc et semper, *
+  et in saecula saeculorum. Amen.
+
+--- our_father
+Pater noster, qui es in caelis, sanctificetur nomen tuum;
+adveniat regnum tuum; fiat voluntas tua, sicut in caelo et in terra.
+Panem nostrum quotidianum da nobis hodie;
+et dimitte nobis debita nostra, sicut et nos dimittimus debitoribus nostris;
+et ne nos inducas in tentationem; sed libera nos a malo.
+
+--- dismissal
+! When a priest or deacon presides, he dismisses the people with a blessing. Otherwise:
+Dominus nos benedicat, et ab omni malo defendat, et ad vitam aeternam perducat.
+R/ Amen.
+
+--- conclusion
+V/ Benedicamus Domino.
+R/ Deo gratias.
+
+--- examen
+! A brief examination of conscience may be made here. In a common celebration, a penitential act may follow.
+
+--- blessing
+Noctem quietam et finem perfectum concedat nobis Dominus omnipotens.
+R/ Amen.
+
+--- te_deum
+Te Deum laudamus: *
+  te Dominum confitemur.
+Te aeternum Patrem, *
+  omnis terra veneratur.
+Tibi omnes angeli, *
+  tibi caeli et universae potestates:
+tibi cherubim et seraphim *
+  incessabili voce proclamant:
+Sanctus, Sanctus, Sanctus *
+  Dominus Deus Sabaoth.
+Pleni sunt caeli et terra *
+  maiestatis gloriae tuae.
+Te gloriosus *
+  Apostolorum chorus,
+te Prophetarum *
+  laudabilis numerus,
+te Martyrum candidatus *
+  laudat exercitus.
+Te per orbem terrarum *
+  sancta confitetur Ecclesia,
+Patrem *
+  immensae maiestatis;
+venerandum tuum verum *
+  et unicum Filium;
+Sanctum quoque *
+  Paraclitum Spiritum.
+Tu rex gloriae, *
+  Christe.
+Tu Patris *
+  sempiternus es Filius.
+Tu, ad liberandum suscepturus hominem, *
+  non horruisti Virginis uterum.
+Tu, devicto mortis aculeo, *
+  aperuisti credentibus regna caelorum.
+Tu ad dexteram Dei sedes, *
+  in gloria Patris.
+Iudex crederis *
+  esse venturus.
+Te ergo quaesumus, tuis famulis subveni, *
+  quos pretioso sanguine redemisti.
+Aeterna fac cum sanctis tuis *
+  in gloria numerari.
+Salvum fac populum tuum, Domine, *
+  et benedic hereditati tuae.
+Et rege eos, *
+  et extolle illos usque in aeternum.
+Per singulos dies *
+  benedicimus te;
+et laudamus nomen tuum in saeculum, *
+  et in saeculum saeculi.
+Dignare, Domine, die isto *
+  sine peccato nos custodire.
+Miserere nostri, Domine, *
+  miserere nostri.
+Fiat misericordia tua, Domine, super nos, *
+  quemadmodum speravimus in te.
+In te, Domine, speravi: *
+  non confundar in aeternum.
+
+--- marian@advent
+Alma Redemptoris Mater, quae pervia caeli
+porta manes, et stella maris, succurre cadenti,
+surgere qui curat, populo: tu quae genuisti,
+natura mirante, tuum sanctum Genitorem,
+Virgo prius ac posterius, Gabrielis ab ore
+sumens illud Ave, peccatorum miserere.
+
+--- marian@lent
+Ave, Regina caelorum,
+Ave, Domina angelorum:
+Salve, radix, salve, porta,
+Ex qua mundo lux est orta:
+Gaude, Virgo gloriosa,
+Super omnes speciosa,
+Vale, o valde decora,
+Et pro nobis Christum exora.
+
+--- marian@easter
+Regina caeli, laetare, alleluia.
+Quia quem meruisti portare, alleluia.
+Resurrexit, sicut dixit, alleluia.
+Ora pro nobis Deum, alleluia.
+
+--- marian@ordinary
+Salve, Regina, mater misericordiae,
+vita, dulcedo, et spes nostra, salve.
+Ad te clamamus exsules filii Hevae,
+ad te suspiramus, gementes et flentes
+in hac lacrimarum valle.
+Eia, ergo, advocata nostra,
+illos tuos misericordes oculos ad nos converte;
+et Iesum, benedictum fructum ventris tui,
+nobis post hoc exsilium ostende.
+O clemens, O pia, O dulcis Virgo Maria.

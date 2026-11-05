@@ -1,0 +1,72 @@
+%% English (public domain): Night Prayer.
+%% Psalms and readings follow the weekly cycle of the Liturgy of the Hours; their
+%% texts come from bible.generated.txt (Douay-Rheims). The hymn is J. M. Neale's
+%% translation of "Te lucis ante terminum" (1851); the responsory follows the
+%% Douay-Rheims Psalm 30:6; the antiphon is a traditional rendering of "Salva nos".
+%% Not included (not public domain): the psalm antiphons and concluding prayers
+%% of the current English Liturgy of the Hours.
+
+%% Used every night (each night's own entry is checked first).
+=== night/common
+--- hymn
+Before the ending of the day,
+Creator of the world, we pray
+That with thy wonted favour thou
+Wouldst be our guard and keeper now.
+
+From all ill dreams defend our eyes,
+From nightly fears and fantasies;
+Tread under foot our ghostly foe,
+That no pollution we may know.
+
+O Father, that we ask be done,
+Through Jesus Christ thine only Son,
+Who, with the Holy Ghost and thee,
+Doth live and reign eternally. Amen.
+
+--- responsory
+V/ Into thy hands, O Lord, * I commend my spirit.
+R/ Into thy hands, O Lord, I commend my spirit.
+V/ Thou hast redeemed us, O Lord, the God of truth.
+R/ I commend my spirit.
+V/ Glory be to the Father, and to the Son, and to the Holy Spirit.
+R/ Into thy hands, O Lord, I commend my spirit.
+
+--- nunc_ant
+Save us, O Lord, while waking, and guard us while sleeping, that we may watch with Christ and rest in peace.
+
+--- nunc_ant@easter
+Save us, O Lord, while waking, and guard us while sleeping, that we may watch with Christ and rest in peace, alleluia.
+
+%% Psalmody of each night (readings are in bible.generated.txt).
+=== night/sat
+--- ps1
+psalms/4
+--- ps2
+psalms/134
+
+=== night/sun
+--- ps1
+psalms/91
+
+=== night/mon
+--- ps1
+psalms/86
+
+=== night/tue
+--- ps1
+psalms/143:1-11
+
+=== night/wed
+--- ps1
+psalms/31:1-6
+--- ps2
+psalms/130
+
+=== night/thu
+--- ps1
+psalms/16
+
+=== night/fri
+--- ps1
+psalms/88

@@ -10,6 +10,11 @@ android {
         // Set by the GitHub workflow (.github/workflows/android.yml) for each build.
         versionCode = Integer.parseInt(System.getenv("BREVIARY_VERSION_CODE") ?: "1")
         versionName = System.getenv("BREVIARY_VERSION_NAME") ?: "1.0-dev"
+        // "Native level" from android-app/native-release.json: raised only when the
+        // Android frame gains something that needs a reinstall. The web app compares
+        // it with the latest release to decide whether to show an update notice.
+        def nativeRelease = new groovy.json.JsonSlurper().parse(file("../../native-release.json"))
+        resValue "integer", "breviary_native_level", nativeRelease.level.toString()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

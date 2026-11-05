@@ -8,7 +8,8 @@ Each translation is a folder in `content-src/` containing an `edition.json`:
 content-src/
   current/       edition.json + .txt files  - current U.S. translation (empty until licensed)
   new/           edition.json + .txt files  - the new translation (empty until released)
-  placeholder/   edition.json + .txt files  - public-domain placeholders and samples
+  english-pd/    edition.json + .txt files  - English, public domain (Douay-Rheims)
+  latin/         edition.json + .txt files  - Latin, public domain (Clementine Vulgate)
   _skeleton/     fill-in-the-blank templates (not built)
 ```
 

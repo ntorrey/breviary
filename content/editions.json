@@ -19,13 +19,22 @@
       "version": "da39a3ee5e6b"
     },
     {
-      "id": "placeholder",
-      "name": "Placeholder texts",
-      "description": "Public-domain prayers and sample text, used until a licensed translation is loaded.",
+      "id": "english-pd",
+      "name": "English (public domain)",
+      "description": "Douay-Rheims psalms and canticles, with traditional English prayers and hymns. Antiphons, readings and prayers proper to the Liturgy of the Hours are not public domain, so they are not included.",
       "default": false,
       "order": 3,
-      "entries": 6,
-      "version": "2769b4670cc8"
+      "entries": 168,
+      "version": "437d4a673301"
+    },
+    {
+      "id": "latin",
+      "name": "Latina (public domain)",
+      "description": "Clementine Vulgate psalms and canticles, with the ancient Latin prayers and hymns. Antiphons, readings and prayers proper to the Liturgy of the Hours are not public domain, so they are not included.",
+      "default": false,
+      "order": 4,
+      "entries": 168,
+      "version": "9b68bbb5045c"
     }
   ]
 }

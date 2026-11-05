@@ -1,0 +1,71 @@
+%% Latina (public domain): Night Prayer (Completorium).
+%% Psalms and readings follow the weekly cycle of the Liturgy of the Hours; their
+%% texts come from bible.generated.txt (Clementine Vulgate). The hymn, responsory
+%% and Gospel-canticle antiphon are ancient and in the public domain.
+%% Not included (not public domain): the psalm antiphons and concluding prayers
+%% of the Liturgia Horarum.
+
+%% Used every night (each night's own entry is checked first).
+=== night/common
+--- hymn
+Te lucis ante terminum,
+rerum Creator, poscimus,
+ut pro tua clementia
+sis praesul et custodia.
+
+Procul recedant somnia,
+et noctium phantasmata;
+hostemque nostrum comprime,
+ne polluantur corpora.
+
+Praesta, Pater piissime,
+Patrique compar Unice,
+cum Spiritu Paraclito
+regnans per omne saeculum. Amen.
+
+--- responsory
+V/ In manus tuas, Domine, * commendo spiritum meum.
+R/ In manus tuas, Domine, commendo spiritum meum.
+V/ Redemisti nos, Domine, Deus veritatis.
+R/ Commendo spiritum meum.
+V/ Gloria Patri, et Filio, et Spiritui Sancto.
+R/ In manus tuas, Domine, commendo spiritum meum.
+
+--- nunc_ant
+Salva nos, Domine, vigilantes, custodi nos dormientes, ut vigilemus cum Christo, et requiescamus in pace.
+
+--- nunc_ant@easter
+Salva nos, Domine, vigilantes, custodi nos dormientes, ut vigilemus cum Christo, et requiescamus in pace, alleluia.
+
+%% Psalmody of each night (readings are in bible.generated.txt).
+=== night/sat
+--- ps1
+psalms/4
+--- ps2
+psalms/134
+
+=== night/sun
+--- ps1
+psalms/91
+
+=== night/mon
+--- ps1
+psalms/86
+
+=== night/tue
+--- ps1
+psalms/143:1-11
+
+=== night/wed
+--- ps1
+psalms/31:1-6
+--- ps2
+psalms/130
+
+=== night/thu
+--- ps1
+psalms/16
+
+=== night/fri
+--- ps1
+psalms/88

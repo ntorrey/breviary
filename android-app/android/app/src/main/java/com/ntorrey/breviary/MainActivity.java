@@ -155,6 +155,22 @@ public class MainActivity extends BridgeActivity {
             runOnUiThread(() -> applyFullScreen(on));
         }
 
+        /** Native level of this APK (android-app/native-release.json at build time). */
+        @JavascriptInterface
+        public int getNativeLevel() {
+            return getResources().getInteger(R.integer.breviary_native_level);
+        }
+
+        /** Version name of this APK, e.g. "1.0.6". */
+        @JavascriptInterface
+        public String getAppVersion() {
+            try {
+                return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
         /** "Keep screen on while praying" (the WebView has no Wake Lock API). */
         @JavascriptInterface
         public void keepScreenOn(boolean on) {

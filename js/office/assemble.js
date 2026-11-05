@@ -206,13 +206,14 @@ export async function assembleHour(iso, hour, settings, store) {
     add({ k: 'text', text: textOf(r.value), src: src(r) });
   };
 
-  const psalmFrom = (r, label) => {
+  const psalmFrom = (r, label, { hideTitle = false } = {}) => {
     let v = r.value;
     let ref = typeof v === 'string' ? v.trim() : v.ref;
     let entry = typeof v === 'object' && v.text ? v : null;
     if (!entry && ref && /^(psalms|canticles)\//.test(ref)) entry = store.get(ref);
     if (!entry) return missing(`${label} (${ref || 'text'})`, { tried: [`${ref || '?'} (referenced from ${r.key} → ${r.field})`] });
-    add({ k: 'psalm', title: (typeof v === 'object' && v.title) || entry.title, subtitle: entry.subtitle, text: textOf(entry), src: src(r) });
+    const title = hideTitle ? null : (typeof v === 'object' && v.title) || entry.title;
+    add({ k: 'psalm', title, subtitle: entry.subtitle, text: textOf(entry), src: src(r) });
     if (!entry.no_gloria && !(typeof v === 'object' && v.no_gloria)) {
       const g = ordinary(ctx, store, 'gloria');
       if (!g.missing) add({ k: 'text', text: textOf(g.value), cls: 'gloria' });
@@ -234,12 +235,14 @@ export async function assembleHour(iso, hour, settings, store) {
     }
   };
 
+  // The heading is the canticle's own title in the chosen translation when it
+  // has one (e.g. "Canticum Simeonis"), so it isn't printed twice.
   const gospelCanticle = (antField, canticleKey, title) => {
-    add({ k: 'heading', text: title });
+    add({ k: 'heading', text: store.get(canticleKey)?.title || title });
     const ant = lookup(ctx, store, antField);
     const antText = ant.missing ? null : textOf(ant.value);
     if (ant.missing) missing('Antiphon', ant); else add({ k: 'antiphon', label: 'Ant.', text: antText, src: src(ant) });
-    psalmFrom({ value: canticleKey, key: 'ordinary', field: canticleKey }, title);
+    psalmFrom({ value: canticleKey, key: 'ordinary', field: canticleKey }, title, { hideTitle: true });
     if (antText) add({ k: 'antiphon', label: 'Ant.', text: antText, repeat: true });
   };
 

@@ -168,6 +168,15 @@ main { max-width: 720px; margin: 0 auto; padding: 0 16px 32px; outline: none; }
 body.reading .tabbar { display: none; }
 body.reading { padding-bottom: var(--bottom-inset); }
 
+/* ---------- Android "update available" notice ---------- */
+.update-banner {
+  margin: 16px 0 0; padding: 14px 16px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--accent);
+}
+.update-banner strong { display: block; font-size: 15px; }
+.update-banner p { margin: 4px 0 10px; font-size: 14px; color: var(--muted); }
+.update-actions { display: flex; gap: 8px; }
+
 /* ---------- Day view ---------- */
 .day-head {
   margin: 20px 0 16px;
