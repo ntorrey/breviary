@@ -21,6 +21,16 @@ To install on a phone:
 
 Updates to the APK install over the old one, and your settings are kept.
 
+## The "update available" notice
+
+The app shows the live website, so most updates need no new APK. A new APK is needed only when the Android frame itself changes (the native code in `android-app/android/`). To tell installed apps about such a change:
+
+1. Raise `level` in `android-app/native-release.json` by one.
+2. Replace `notes` with a short description of what the new APK adds (it appears in the notice).
+3. Push. The workflow builds the APK and publishes the new level.
+
+Installed apps with a lower level then show a notice on the Today screen, with a **Download** button and **Not now**. Rebuilding the APK without raising the level shows no notice.
+
 ## How it is built
 
 The GitHub workflow `.github/workflows/android.yml` builds a signed release APK whenever something in `android-app/` changes. You can also run it by hand from the repository's **Actions** tab (**Build Android app** → **Run workflow**). It publishes the APK to the `android` release, so the download address never changes.
